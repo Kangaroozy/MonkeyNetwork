@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { PLAYER_MODAL_EVENT } from "@/lib/playerModal";
-import { getLevelColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
+import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
 
 export default function PlayerStatsModal() {
   const [username, setUsername] = useState<string | null>(null);
@@ -43,9 +43,22 @@ export default function PlayerStatsModal() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#8A8A95]">Player Overview</p>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#F0F0F2] mt-1">
-              {data?.username ?? username}
-            </h3>
+            <div className="mt-1 flex items-center gap-2 min-w-0">
+              {data && getRankIconPath(data.rankKey) && (
+                <img
+                  src={getRankIconPath(data.rankKey)}
+                  alt="Rank"
+                  className="h-6 w-auto shrink-0 object-contain"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              )}
+              <h3
+                className="text-2xl sm:text-3xl font-extrabold truncate"
+                style={{ color: data ? getNameColor(data.rankKey) : "#F0F0F2" }}
+              >
+                {data?.username ?? username}
+              </h3>
+            </div>
           </div>
           <button
             onClick={() => setUsername(null)}
@@ -68,19 +81,11 @@ export default function PlayerStatsModal() {
                   className="absolute left-1/2 -translate-x-1/2 top-1 h-[170px] w-auto"
                 />
               </div>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-3 flex items-center gap-2 whitespace-nowrap">
                 <img src={getStarIconPath(data.level)} alt="" className="w-4 h-4 object-contain" />
                 <span className="text-sm font-semibold" style={{ color: getLevelColor(data.level) }}>
                   Level {data.level}
                 </span>
-                {getRankIconPath(data.rankKey) && (
-                  <img
-                    src={getRankIconPath(data.rankKey)}
-                    alt="Rank"
-                    className="h-5 w-auto object-contain"
-                    style={{ imageRendering: "pixelated" }}
-                  />
-                )}
               </div>
               <div className="mt-3 w-full">
                 <div className="flex items-center justify-between text-[11px] text-[#8A8A95] mb-1">
