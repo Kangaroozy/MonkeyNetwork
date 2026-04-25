@@ -73,21 +73,21 @@ export const playerRouter = createRouter({
       const db = getDb();
       const raw = await db.execute(sql`
         SELECT
-          LOWER(HEX(unique_id)) AS id,
-          player_name AS username,
-          skin_url AS avatarUrl,
+          LOWER(HEX(web_profile.unique_id)) AS id,
+          web_profile.player_name AS username,
+          web_profile.skin_url AS avatarUrl,
           COALESCE(profile.rank, 'default') AS rankKey,
           COALESCE(profile.level, 1) AS level
         FROM player_web_profile web_profile
         LEFT JOIN player_profile profile ON profile.unique_id = web_profile.unique_id
-        WHERE player_name LIKE ${`%${input.query}%`}
+        WHERE LOWER(web_profile.player_name) LIKE LOWER(${`%${input.query}%`})
         ORDER BY
           CASE
-            WHEN LOWER(player_name) = LOWER(${input.query}) THEN 0
-            WHEN LOWER(player_name) LIKE LOWER(${`${input.query}%`}) THEN 1
+            WHEN LOWER(web_profile.player_name) = LOWER(${input.query}) THEN 0
+            WHEN LOWER(web_profile.player_name) LIKE LOWER(${`${input.query}%`}) THEN 1
             ELSE 2
           END,
-          updated_at DESC
+          web_profile.updated_at DESC
         LIMIT ${input.limit}
       `);
       const rows = extractRows<{
