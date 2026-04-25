@@ -73,3 +73,25 @@
     display: none;
   }
 }
+
+@keyframes leaderboard-shimmer {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+.leaderboard-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 15%,
+    rgba(255, 255, 255, 0.22) 45%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  animation: leaderboard-shimmer 2.2s linear infinite;
+}

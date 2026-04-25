@@ -23,6 +23,35 @@ type LeaderboardEntry = {
   killAverage: number;
 };
 
+function placementPalette(rank: number) {
+  if (rank === 1) {
+    return {
+      border: "rgba(255, 215, 0, 0.7)",
+      glow: "0 0 35px rgba(255, 215, 0, 0.2)",
+      badge: "#FFD700",
+    };
+  }
+  if (rank === 2) {
+    return {
+      border: "rgba(192, 192, 192, 0.65)",
+      glow: "0 0 28px rgba(192, 192, 192, 0.2)",
+      badge: "#C0C0C0",
+    };
+  }
+  if (rank === 3) {
+    return {
+      border: "rgba(205, 127, 50, 0.65)",
+      glow: "0 0 28px rgba(205, 127, 50, 0.2)",
+      badge: "#CD7F32",
+    };
+  }
+  return {
+    border: "rgba(255,255,255,0.08)",
+    glow: "0 0 0 transparent",
+    badge: "#5A5A65",
+  };
+}
+
 function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -227,127 +256,111 @@ function LeaderboardSection() {
             ))}
           </select>
         )}
+        <select
+          value={sortBy}
+          onChange={(event) =>
+            toggleSort(event.target.value as typeof sortBy)
+          }
+          className="ml-auto bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#F0F0F2]"
+        >
+          <option value="totalKills">Sort: Total Kills</option>
+          <option value="wins">Sort: Wins</option>
+          <option value="winRate">Sort: Win Rate</option>
+          <option value="kda">Sort: KDA</option>
+          <option value="killAverage">Sort: Kill Avg</option>
+          <option value="deaths">Sort: Deaths</option>
+          <option value="username">Sort: Username</option>
+        </select>
+        <button
+          onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+          className="bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#8A8A95] hover:text-[#F0F0F2] transition-colors"
+        >
+          {sortOrder === "desc" ? "Desc" : "Asc"}
+        </button>
       </div>
 
-      <div className="bg-[#111114] border border-[rgba(255,255,255,0.06)] rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-[#1A1A1F]">
-                {[
-                  { key: "rank" as const, label: "Rank", width: "60px" },
-                  { key: "username" as const, label: "Player", width: "auto" },
-                  { key: "wins" as const, label: "Wins", width: "80px" },
-                  { key: "winRate" as const, label: "Win Rate", width: "110px" },
-                  { key: "kda" as const, label: "KDA", width: "90px" },
-                  { key: "deaths" as const, label: "Deaths", width: "90px" },
-                  { key: "killAverage" as const, label: "Kill Avg", width: "100px" },
-                  { key: "totalKills" as const, label: "Total Kills", width: "110px" },
-                ].map((col) => (
-                  <th
-                    key={col.label}
-                    className="text-left px-4 py-3 text-[12px] font-semibold text-[#5A5A65] uppercase tracking-[0.04em] cursor-pointer hover:text-[#8A8A95] transition-colors select-none"
-                    style={{ width: col.width }}
-                    onClick={() => (col.key !== "rank" ? toggleSort(col.key) : undefined)}
-                  >
-                    {col.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                Array.from({ length: 10 }).map((_, i) => (
-                  <tr key={i} className="border-b border-[rgba(255,255,255,0.03)]">
-                    <td colSpan={8} className="px-4 py-4">
-                      <div className="h-10 bg-[#222228] rounded-lg animate-pulse" />
-                    </td>
-                  </tr>
-                ))
-              ) : leaderboard?.players.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-[14px] text-[#5A5A65]">
-                    No players found
-                  </td>
-                </tr>
-              ) : (
-                leaderboard?.players.map((player: LeaderboardEntry, idx: number) => {
-                  const rank = player.rank || idx + 1 + (page - 1) * 50;
-                  const isTop3 = rank <= 3;
-                  return (
-                    <tr
-                      key={player.playerId}
-                      onClick={() => openPlayerModal(player.username)}
-                      className="group border-b border-[rgba(255,255,255,0.03)] transition-all duration-150 hover:bg-[#1A1A1F] cursor-pointer"
-                      style={{
-                        borderLeft: isTop3 ? `3px solid ${rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32"}` : "3px solid transparent",
-                      }}
-                    >
-                      <td className="px-4 py-3.5">
-                        {isTop3 ? (
-                          <Crown
-                            className="w-4 h-4"
-                            style={{
-                              color: rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32",
-                            }}
-                          />
-                        ) : (
-                          <span className="text-[14px] font-bold text-[#5A5A65]">#{rank}</span>
+      <div className="space-y-3">
+        {isLoading ? (
+          Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-24 bg-[#111114] border border-[rgba(255,255,255,0.06)] rounded-2xl animate-pulse" />
+          ))
+        ) : leaderboard?.players.length === 0 ? (
+          <div className="bg-[#111114] border border-[rgba(255,255,255,0.06)] rounded-2xl px-4 py-12 text-center text-[14px] text-[#5A5A65]">
+            No players found
+          </div>
+        ) : (
+          leaderboard?.players.map((player: LeaderboardEntry, idx: number) => {
+            const rank = player.rank || idx + 1 + (page - 1) * 50;
+            const isTop3 = rank <= 3;
+            const palette = placementPalette(rank);
+            return (
+              <button
+                key={player.playerId}
+                onClick={() => openPlayerModal(player.username)}
+                className="group relative w-full overflow-hidden rounded-2xl border bg-[#111114]/90 text-left transition-all duration-200 md:hover:-translate-x-3 md:hover:scale-[1.01] hover:bg-[#18181d] active:scale-[0.99]"
+                style={{ borderColor: palette.border, boxShadow: palette.glow }}
+              >
+                {isTop3 && <div className="leaderboard-shimmer absolute inset-0 opacity-60" />}
+                <div className="relative z-10 flex flex-col gap-3 p-3 md:flex-row md:items-center md:gap-4 md:p-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative h-20 w-40 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                      <span
+                        className="absolute left-2 bottom-1 text-[32px] font-black italic leading-none drop-shadow-[0_3px_2px_rgba(0,0,0,0.7)]"
+                        style={{ color: palette.badge }}
+                      >
+                        {rank}.
+                      </span>
+                      <img
+                        src={`https://mc-heads.net/body/${encodeURIComponent(player.username)}/right`}
+                        alt={`${player.username} skin`}
+                        className="absolute right-2 -bottom-1 h-[84px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
+                        loading={rank <= 3 ? "eager" : "lazy"}
+                      />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className="text-[20px] md:text-[24px] font-extrabold truncate"
+                          style={{ color: getNameColor(player.rankKey) }}
+                        >
+                          {player.username}
+                        </h3>
+                        {isTop3 && <Crown className="w-4 h-4 shrink-0" style={{ color: palette.badge }} />}
+                      </div>
+                      <div className="mt-1 flex items-center gap-2 text-[13px] text-[#8A8A95]">
+                        <img src={getStarIconPath(player.level)} alt="" className="w-4 h-4 object-contain" />
+                        <span style={{ color: getLevelColor(player.level) }}>Level {formatNumber(player.level)}</span>
+                        {getRankIconPath(player.rankKey) && (
+                          <img src={getRankIconPath(player.rankKey)} alt="" className="h-4 w-auto object-contain" />
                         )}
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={player.avatarUrl || `https://mc-heads.net/avatar/${player.username}`}
-                            alt={player.username}
-                            className="w-8 h-8 rounded"
-                            loading="lazy"
-                          />
-                          <div className="text-[14px] font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-1.5">
-                            <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
-                            <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
-                            {getRankIconPath(player.rankKey) && (
-                              <img src={getRankIconPath(player.rankKey)} alt="" className="h-3.5 w-auto object-contain" />
-                            )}
-                            <span style={{ color: getNameColor(player.rankKey) }}>{player.username}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-[14px] text-[#8A8A95]">{formatNumber(player.wins)}</span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-[60px] h-1 bg-[#222228] rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-[#2ECC71] rounded-full"
-                              style={{ width: `${(typeof player.winRate === "string" ? parseFloat(player.winRate) : player.winRate || 0) * 100}%` }}
-                            />
-                          </div>
-                          <span className="text-[13px] text-[#8A8A95]">
-                            {formatWinRate(player.winRate)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-[13px] text-[#8A8A95]">{(player.kda ?? 0).toFixed(2)}</span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-[13px] text-[#8A8A95]">{formatNumber(player.deaths)}</span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-[13px] text-[#8A8A95]">{(player.killAverage ?? 0).toFixed(2)}</span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-[14px] font-semibold text-[#F0F0F2]">{formatNumber(player.totalKills)}</span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="md:ml-auto grid grid-cols-2 gap-2 md:flex md:items-center md:gap-3">
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                      <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">Wins</p>
+                      <p className="text-[14px] font-bold text-[#F0F0F2]">{formatNumber(player.wins)}</p>
+                    </div>
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                      <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">Win Rate</p>
+                      <p className="text-[14px] font-bold text-[#F0F0F2]">{formatWinRate(player.winRate)}</p>
+                    </div>
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                      <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">KDA</p>
+                      <p className="text-[14px] font-bold text-[#F0F0F2]">{(player.kda ?? 0).toFixed(2)}</p>
+                    </div>
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                      <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">Kills</p>
+                      <p className="text-[14px] font-bold text-[#F0F0F2]">{formatNumber(player.totalKills)}</p>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            );
+          })
+        )}
       </div>
 
       {leaderboard && leaderboard.totalPages > 1 && (
