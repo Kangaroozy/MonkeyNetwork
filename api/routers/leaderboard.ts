@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createRouter, publicQuery } from "../middleware";
 import { getDb } from "../queries/connection";
+import { resolveLuckPermsPrimaryGroups } from "../queries/luckPerms";
 import { sql, type SQL } from "drizzle-orm";
 
 function extractRows<T>(raw: unknown): T[] {
@@ -215,22 +216,31 @@ export const leaderboardRouter = createRouter({
       const countRows = extractRows<{ total: number }>(countRowsRaw);
       const total = Number(countRows[0]?.total ?? 0);
 
-      const players = leaderboardRows.map((row, index) => ({
-        rank: offset + index + 1,
-        playerId: row.playerUuidHex,
-        username: row.username,
-        avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.playerUuidHex, row.username),
-        rankKey: (row.rankKey ?? "default").toLowerCase(),
-        level: Number(row.level ?? 1),
-        wins: Number(row.wins ?? 0),
-        losses: Number(row.losses ?? 0),
-        totalKills: Number(row.totalKills ?? 0),
-        deaths: Number(row.deaths ?? 0),
-        matchesPlayed: Number(row.matchesPlayed ?? 0),
-        winRate: Number(row.winRate ?? 0),
-        kda: Number(row.kda ?? 0),
-        killAverage: Number(row.killAverage ?? 0),
-      }));
+      const luckPermsGroups = await resolveLuckPermsPrimaryGroups(
+        leaderboardRows.map((row) => row.playerUuidHex),
+      );
+
+      const players = leaderboardRows.map((row, index) => {
+        const uuidHex = (row.playerUuidHex ?? "").toLowerCase();
+        const fallbackRank = (row.rankKey ?? "default").toLowerCase();
+        const rankKey = luckPermsGroups.get(uuidHex) ?? fallbackRank;
+        return {
+          rank: offset + index + 1,
+          playerId: row.playerUuidHex,
+          username: row.username,
+          avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.playerUuidHex, row.username),
+          rankKey,
+          level: Number(row.level ?? 1),
+          wins: Number(row.wins ?? 0),
+          losses: Number(row.losses ?? 0),
+          totalKills: Number(row.totalKills ?? 0),
+          deaths: Number(row.deaths ?? 0),
+          matchesPlayed: Number(row.matchesPlayed ?? 0),
+          winRate: Number(row.winRate ?? 0),
+          kda: Number(row.kda ?? 0),
+          killAverage: Number(row.killAverage ?? 0),
+        };
+      });
 
       return {
         players,

@@ -159,7 +159,12 @@ export default function Navbar() {
                         <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
                         <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
                         {getRankIconPath(player.rankKey) && (
-                          <img src={getRankIconPath(player.rankKey)} alt="" className="h-3.5 w-auto object-contain" />
+                          <img
+                            src={getRankIconPath(player.rankKey)}
+                            alt=""
+                            className="h-5 w-auto object-contain"
+                            style={{ imageRendering: "pixelated" }}
+                          />
                         )}
                         <span className="truncate">{player.username}</span>
                       </p>
@@ -220,7 +225,12 @@ export default function Navbar() {
                     <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
                     <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
                     {getRankIconPath(player.rankKey) && (
-                      <img src={getRankIconPath(player.rankKey)} alt="" className="h-3.5 w-auto object-contain" />
+                      <img
+                        src={getRankIconPath(player.rankKey)}
+                        alt=""
+                        className="h-5 w-auto object-contain"
+                        style={{ imageRendering: "pixelated" }}
+                      />
                     )}
                     <span>{player.username}</span>
                   </span>

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createRouter, publicQuery } from "../middleware";
 import { getDb } from "../queries/connection";
+import { resolveLuckPermsPrimaryGroups } from "../queries/luckPerms";
 import { players, rankings, gameModes } from "@db/schema";
 import { eq, sql } from "drizzle-orm";
 
@@ -65,12 +66,17 @@ export const playerRouter = createRouter({
         rankKey: string | null;
         level: number | null;
       }>(raw);
-      return rows.map((row) => ({
-        ...row,
-        avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.id || row.username),
-        rankKey: (row.rankKey ?? "default").toLowerCase(),
-        level: Number(row.level ?? 1),
-      }));
+      const luckPermsGroups = await resolveLuckPermsPrimaryGroups(rows.map((row) => row.id));
+      return rows.map((row) => {
+        const uuidHex = (row.id ?? "").toLowerCase();
+        const fallbackRank = (row.rankKey ?? "default").toLowerCase();
+        return {
+          ...row,
+          avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.id || row.username),
+          rankKey: luckPermsGroups.get(uuidHex) ?? fallbackRank,
+          level: Number(row.level ?? 1),
+        };
+      });
     }),
 
   previewByUsername: publicQuery
@@ -134,10 +140,12 @@ export const playerRouter = createRouter({
       const winRate = matchesPlayed > 0 ? wins / matchesPlayed : 0;
       const kda = deaths > 0 ? kills / deaths : kills;
       const killAverage = matchesPlayed > 0 ? kills / matchesPlayed : 0;
+      const luckPermsGroups = await resolveLuckPermsPrimaryGroups([row.id]);
+      const fallbackRank = (row.rankKey ?? "default").toLowerCase();
       return {
         ...row,
         avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.id || row.username),
-        rankKey: (row.rankKey ?? "default").toLowerCase(),
+        rankKey: luckPermsGroups.get((row.id ?? "").toLowerCase()) ?? fallbackRank,
         level: Number(row.level ?? 1),
         wins,
         losses: Number(row.losses ?? 0),

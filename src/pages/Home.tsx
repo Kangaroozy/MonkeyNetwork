@@ -323,13 +323,12 @@ function LeaderboardSection() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         {getRankIconPath(player.rankKey) && (
-                          <span className="inline-flex h-6 items-center rounded-md bg-black/25 px-1.5 ring-1 ring-white/10 shrink-0">
-                            <img
-                              src={getRankIconPath(player.rankKey)}
-                              alt=""
-                              className="h-4.5 max-h-[18px] w-auto object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.65)]"
-                            />
-                          </span>
+                          <img
+                            src={getRankIconPath(player.rankKey)}
+                            alt=""
+                            className="h-7 w-auto shrink-0 object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.65)]"
+                            style={{ imageRendering: "pixelated" }}
+                          />
                         )}
                         <h3
                           className="text-[20px] md:text-[24px] font-extrabold truncate"
