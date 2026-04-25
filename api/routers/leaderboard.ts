@@ -163,6 +163,8 @@ export const leaderboardRouter = createRouter({
             LOWER(HEX(aggregated.player_uuid)) AS playerUuidHex,
             COALESCE(web_profile.player_name, LEFT(LOWER(HEX(aggregated.player_uuid)), 12)) AS username,
             web_profile.skin_url AS avatarUrl,
+            COALESCE(profile.rank, 'default') AS rankKey,
+            COALESCE(profile.level, 1) AS level,
             aggregated.wins AS wins,
             aggregated.losses AS losses,
             aggregated.totalKills AS totalKills,
@@ -182,6 +184,7 @@ export const leaderboardRouter = createRouter({
             END AS killAverage
           FROM aggregated
           LEFT JOIN player_web_profile web_profile ON web_profile.unique_id = aggregated.player_uuid
+          LEFT JOIN player_profile profile ON profile.unique_id = aggregated.player_uuid
           ORDER BY ${orderExpr} ${direction}, username ASC
           LIMIT ${input.limit} OFFSET ${offset}
         `,
@@ -198,6 +201,8 @@ export const leaderboardRouter = createRouter({
         playerUuidHex: string;
         username: string;
         avatarUrl: string | null;
+        rankKey: string | null;
+        level: number | null;
         wins: number;
         losses: number;
         totalKills: number;
@@ -215,6 +220,8 @@ export const leaderboardRouter = createRouter({
         playerId: row.playerUuidHex,
         username: row.username,
         avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.playerUuidHex, row.username),
+        rankKey: (row.rankKey ?? "default").toLowerCase(),
+        level: Number(row.level ?? 1),
         wins: Number(row.wins ?? 0),
         losses: Number(row.losses ?? 0),
         totalKills: Number(row.totalKills ?? 0),

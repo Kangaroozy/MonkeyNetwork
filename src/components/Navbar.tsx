@@ -3,11 +3,14 @@ import { Link, useLocation } from "react-router";
 import { Search, Menu, X, Crown } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { openPlayerModal } from "@/lib/playerModal";
+import { getLevelColor, getNameColor, getRankEmoji, getStarColor } from "@/lib/playerStyle";
 
 type SearchPlayer = {
   id: string;
   username: string;
   avatarUrl: string | null;
+  rankKey: string;
+  level: number;
 };
 
 export default function Navbar() {
@@ -149,7 +152,15 @@ export default function Navbar() {
                       className="w-8 h-8 rounded"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-[#F0F0F2] truncate">{player.username}</p>
+                      <p
+                        className="text-[13px] font-semibold truncate flex items-center gap-1.5"
+                        style={{ color: getNameColor(player.rankKey) }}
+                      >
+                        <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
+                        <span style={{ color: getStarColor(player.level) }}>★</span>
+                        {getRankEmoji(player.rankKey) && <span>{getRankEmoji(player.rankKey)}</span>}
+                        <span className="truncate">{player.username}</span>
+                      </p>
                       <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
                     </div>
                   </button>
@@ -203,7 +214,12 @@ export default function Navbar() {
                     alt={player.username}
                     className="w-7 h-7 rounded"
                   />
-                  <span className="text-[13px] font-medium text-[#F0F0F2]">{player.username}</span>
+                  <span className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: getNameColor(player.rankKey) }}>
+                    <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
+                    <span style={{ color: getStarColor(player.level) }}>★</span>
+                    {getRankEmoji(player.rankKey) && <span>{getRankEmoji(player.rankKey)}</span>}
+                    <span>{player.username}</span>
+                  </span>
                 </button>
               ))}
             </div>
