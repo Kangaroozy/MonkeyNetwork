@@ -108,11 +108,6 @@ export default function PlayerStatsModal() {
               <StatCard label="EXP %" value={`${expProgress}%`} />
             </div>
 
-            <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-              <p className="text-[12px] text-[#8A8A95]">
-                Clean profile preview for <span className="text-[#F0F0F2] font-semibold">{data.username}</span>.
-              </p>
-            </div>
           </div>
         )}
       </div>
