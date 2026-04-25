@@ -300,6 +300,9 @@ function LeaderboardSection() {
                 className="group relative w-full overflow-hidden rounded-xl sm:rounded-2xl border bg-[#111114]/90 text-left transition-all duration-200 md:hover:-translate-x-3 md:hover:scale-[1.01] hover:bg-[#18181d] active:scale-[0.99]"
                 style={{ borderColor: palette.border, boxShadow: palette.glow }}
               >
+                {isTop3 && (
+                  <div className="leaderboard-shimmer pointer-events-none absolute inset-0 opacity-35" />
+                )}
                 <div className="relative z-10 flex flex-col gap-3 p-2.5 sm:p-3 md:flex-row md:items-center md:gap-4 md:p-4">
                   <div className="flex items-center gap-3 min-w-0 max-sm:flex-col max-sm:items-start">
                     <div className="group/rank relative h-16 w-28 sm:h-20 sm:w-36 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden shrink-0">
