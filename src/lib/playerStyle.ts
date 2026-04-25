@@ -1,6 +1,7 @@
 const NAME_COLOR_DEFAULT = "#8a8a8a";
 
 const RANK_ICON_BY_GROUP: Record<string, string> = {
+  default: "/assets/rank-icons/rank_default.png",
   vip: "/assets/rank-icons/rank_vip_base.png",
   "vip+": "/assets/rank-icons/rank_vip_base.png",
   developer: "/assets/rank-icons/rank_developer.png",
@@ -70,8 +71,8 @@ export function getRankIconPath(rankKey: string | null | undefined): string {
   if (direct) {
     return direct;
   }
-  if (group === "default") {
-    return "";
+  if (group === "default" || group.length === 0) {
+    return "/assets/rank-icons/rank_default.png";
   }
   if (group.includes("vip")) {
     return "/assets/rank-icons/rank_vip_base.png";
@@ -97,7 +98,7 @@ export function getRankIconPath(rankKey: string | null | undefined): string {
   if (group.includes("owner")) {
     return "/assets/rank-icons/rank_owner.png";
   }
-  return "";
+  return "/assets/rank-icons/rank_default.png";
 }
 
 export function getNameColor(rankKey: string | null | undefined): string {
