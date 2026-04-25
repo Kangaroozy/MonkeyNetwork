@@ -79,7 +79,7 @@ function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-[88dvh] sm:min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0B] via-[#0d0d10] to-[#0A0A0B]" />
       <div className="absolute inset-0 opacity-30">
@@ -90,7 +90,7 @@ function HeroSection() {
       <div className="relative z-10 text-center px-4">
         <h1
           ref={titleRef}
-          className="text-[64px] sm:text-[96px] lg:text-[128px] font-extrabold tracking-[-0.02em] leading-none mb-6"
+          className="text-[46px] sm:text-[96px] lg:text-[128px] font-extrabold tracking-[-0.02em] leading-none mb-4 sm:mb-6"
           style={{ perspective: "1000px" }}
         >
           {title.split("").map((letter, i) => (
@@ -107,7 +107,7 @@ function HeroSection() {
           ))}
         </h1>
 
-        <p className="text-[18px] sm:text-[20px] text-[#8A8A95] font-normal mb-8">
+        <p className="text-[15px] sm:text-[20px] text-[#8A8A95] font-normal mb-7 sm:mb-8">
           Competitive Minecraft UHC Rankings
         </p>
 
@@ -186,7 +186,7 @@ function LeaderboardSection() {
   };
 
   return (
-    <section className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+    <section className="max-w-[1280px] mx-auto px-3 sm:px-6 py-6 sm:py-8">
       <div className="mb-8">
         <h2 className="text-[28px] font-bold text-[#F0F0F2] mb-2">
           {activeMode === "overall" ? "Global Leaderboard" : `${modeLabel(activeMode)} Leaderboard`}
@@ -219,10 +219,10 @@ function LeaderboardSection() {
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
         <button
           onClick={() => setClassScope("all")}
-          className="px-3 py-2 rounded-lg text-[13px] border transition-colors"
+          className="px-3 py-2 rounded-lg text-[13px] border transition-colors max-sm:flex-1 max-sm:min-w-[120px]"
           style={{
             color: classScope === "all" ? "#F0F0F2" : "#8A8A95",
             borderColor: classScope === "all" ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.08)",
@@ -233,7 +233,7 @@ function LeaderboardSection() {
         </button>
         <button
           onClick={() => setClassScope("kit")}
-          className="px-3 py-2 rounded-lg text-[13px] border transition-colors"
+          className="px-3 py-2 rounded-lg text-[13px] border transition-colors max-sm:flex-1 max-sm:min-w-[120px]"
           style={{
             color: classScope === "kit" ? "#F0F0F2" : "#8A8A95",
             borderColor: classScope === "kit" ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.08)",
@@ -246,7 +246,7 @@ function LeaderboardSection() {
           <select
             value={kitKey}
             onChange={(event) => setKitKey(event.target.value)}
-            className="bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#F0F0F2]"
+            className="bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#F0F0F2] max-sm:w-full"
           >
             {kits.length === 0 && <option value="">No kits</option>}
             {kits.map((kit: string) => (
@@ -261,7 +261,7 @@ function LeaderboardSection() {
           onChange={(event) =>
             toggleSort(event.target.value as typeof sortBy)
           }
-          className="ml-auto bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#F0F0F2]"
+          className="ml-auto bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#F0F0F2] max-sm:ml-0 max-sm:w-full sm:max-w-[220px]"
         >
           <option value="totalKills">Sort: Total Kills</option>
           <option value="wins">Sort: Wins</option>
@@ -273,7 +273,7 @@ function LeaderboardSection() {
         </select>
         <button
           onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
-          className="bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#8A8A95] hover:text-[#F0F0F2] transition-colors"
+          className="bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[13px] text-[#8A8A95] hover:text-[#F0F0F2] transition-colors max-sm:w-full sm:w-auto"
         >
           {sortOrder === "desc" ? "Desc" : "Asc"}
         </button>
@@ -297,17 +297,17 @@ function LeaderboardSection() {
               <button
                 key={player.playerId}
                 onClick={() => openPlayerModal(player.username)}
-                className="group relative w-full overflow-hidden rounded-2xl border bg-[#111114]/90 text-left transition-all duration-200 md:hover:-translate-x-3 md:hover:scale-[1.01] hover:bg-[#18181d] active:scale-[0.99]"
+                className="group relative w-full overflow-hidden rounded-xl sm:rounded-2xl border bg-[#111114]/90 text-left transition-all duration-200 md:hover:-translate-x-3 md:hover:scale-[1.01] hover:bg-[#18181d] active:scale-[0.99]"
                 style={{ borderColor: palette.border, boxShadow: palette.glow }}
               >
-                <div className="relative z-10 flex flex-col gap-3 p-3 md:flex-row md:items-center md:gap-4 md:p-4">
+                <div className="relative z-10 flex flex-col gap-3 p-2.5 sm:p-3 md:flex-row md:items-center md:gap-4 md:p-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="group/rank relative h-20 w-36 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                    <div className="group/rank relative h-16 w-28 sm:h-20 sm:w-36 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden shrink-0">
                       {isTop3 && (
                         <div className="leaderboard-shimmer absolute inset-0 opacity-0 transition-opacity duration-200 group-hover/rank:opacity-75" />
                       )}
                       <span
-                        className="absolute left-2 bottom-1 text-[32px] font-black italic leading-none drop-shadow-[0_3px_2px_rgba(0,0,0,0.7)]"
+                        className="absolute left-1.5 sm:left-2 bottom-1 text-[24px] sm:text-[32px] font-black italic leading-none drop-shadow-[0_3px_2px_rgba(0,0,0,0.7)]"
                         style={{ color: palette.badge }}
                       >
                         {rank}.
@@ -315,7 +315,7 @@ function LeaderboardSection() {
                       <img
                         src={`https://mc-heads.net/body/${encodeURIComponent(player.username)}/right`}
                         alt={`${player.username} top-half skin`}
-                        className="absolute right-7 top-1 h-[116px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
+                        className="absolute right-4 sm:right-7 top-0 sm:top-1 h-[92px] sm:h-[116px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
                         loading={rank <= 3 ? "eager" : "lazy"}
                       />
                     </div>
@@ -331,34 +331,34 @@ function LeaderboardSection() {
                           />
                         )}
                         <h3
-                          className="text-[20px] md:text-[24px] font-extrabold truncate"
+                          className="text-[17px] sm:text-[20px] md:text-[24px] font-extrabold truncate"
                           style={{ color: getNameColor(player.rankKey) }}
                         >
                           {player.username}
                         </h3>
                         {isTop3 && <Crown className="w-4 h-4 shrink-0" style={{ color: palette.badge }} />}
                       </div>
-                      <div className="mt-1 flex items-center gap-2 text-[13px] text-[#8A8A95]">
+                      <div className="mt-1 flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] text-[#8A8A95]">
                         <img src={getStarIconPath(player.level)} alt="" className="w-4 h-4 object-contain" />
                         <span style={{ color: getLevelColor(player.level) }}>Level {formatNumber(player.level)}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="md:ml-auto grid grid-cols-2 gap-2 md:flex md:items-center md:gap-3">
-                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                  <div className="md:ml-auto grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center md:gap-3">
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-2.5 sm:px-3 py-2 md:min-w-[88px]">
                       <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">Wins</p>
                       <p className="text-[14px] font-bold text-[#F0F0F2]">{formatNumber(player.wins)}</p>
                     </div>
-                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-2.5 sm:px-3 py-2 md:min-w-[88px]">
                       <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">Win Rate</p>
                       <p className="text-[14px] font-bold text-[#F0F0F2]">{formatWinRate(player.winRate)}</p>
                     </div>
-                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-2.5 sm:px-3 py-2 md:min-w-[88px]">
                       <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">KDA</p>
                       <p className="text-[14px] font-bold text-[#F0F0F2]">{(player.kda ?? 0).toFixed(2)}</p>
                     </div>
-                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-3 py-2 min-w-[88px]">
+                    <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[#16161c] px-2.5 sm:px-3 py-2 md:min-w-[88px]">
                       <p className="text-[10px] uppercase tracking-[0.06em] text-[#5A5A65]">Kills</p>
                       <p className="text-[14px] font-bold text-[#F0F0F2]">{formatNumber(player.totalKills)}</p>
                     </div>

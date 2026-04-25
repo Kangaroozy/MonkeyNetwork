@@ -33,11 +33,11 @@ export default function PlayerStatsModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+      className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center px-3 sm:px-4 py-4"
       onClick={() => setUsername(null)}
     >
       <div
-        className="w-full max-w-3xl rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(212,168,67,0.18),_rgba(17,17,20,0.96)_45%)] p-6 sm:p-8 shadow-[0_40px_120px_rgba(0,0,0,0.65)]"
+        className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto rounded-[22px] sm:rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(212,168,67,0.18),_rgba(17,17,20,0.96)_45%)] p-4 sm:p-8 shadow-[0_40px_120px_rgba(0,0,0,0.65)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
@@ -53,7 +53,7 @@ export default function PlayerStatsModal() {
                 />
               )}
               <h3
-                className="text-2xl sm:text-3xl font-extrabold truncate"
+                className="text-xl sm:text-3xl font-extrabold truncate"
                 style={{ color: data ? getNameColor(data.rankKey) : "#F0F0F2" }}
               >
                 {data?.username ?? username}
@@ -72,13 +72,13 @@ export default function PlayerStatsModal() {
         {isFetching || !data ? (
           <div className="mt-6 h-44 rounded-2xl bg-white/5 animate-pulse" />
         ) : (
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-[230px_1fr] gap-6">
+          <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-[230px_1fr] gap-4 sm:gap-6">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4 flex flex-col items-center">
-              <div className="relative w-full h-44 rounded-xl border border-white/10 bg-[#0c0c10] overflow-hidden">
+              <div className="relative w-full h-36 sm:h-44 rounded-xl border border-white/10 bg-[#0c0c10] overflow-hidden">
                 <img
                   src={`https://mc-heads.net/body/${encodeURIComponent(data.username)}/right`}
                   alt={`${data.username} model`}
-                  className="absolute left-1/2 -translate-x-1/2 top-1 h-[170px] w-auto"
+                  className="absolute left-1/2 -translate-x-1/2 top-1 h-[138px] sm:h-[170px] w-auto"
                 />
               </div>
               <div className="mt-3 flex items-center gap-2 whitespace-nowrap">
@@ -101,7 +101,7 @@ export default function PlayerStatsModal() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
               <StatCard label="Win Rate" value={`${winRate}%`} />
               <StatCard label="KDA" value={data.kda.toFixed(2)} />
               <StatCard label="Kill Avg" value={data.killAverage.toFixed(2)} />
@@ -122,9 +122,9 @@ export default function PlayerStatsModal() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+    <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-black/20 px-3 sm:px-4 py-2.5 sm:py-3">
       <p className="text-[11px] uppercase tracking-[0.08em] text-[#8A8A95]">{label}</p>
-      <p className="text-lg font-bold text-[#F0F0F2] mt-1">{value}</p>
+      <p className="text-[16px] sm:text-lg font-bold text-[#F0F0F2] mt-1">{value}</p>
     </div>
   );
 }
