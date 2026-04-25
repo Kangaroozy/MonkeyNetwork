@@ -301,7 +301,15 @@ function LeaderboardSection() {
                 style={{ borderColor: palette.border, boxShadow: palette.glow }}
               >
                 {isTop3 && (
-                  <div className="leaderboard-shimmer pointer-events-none absolute inset-0 opacity-35" />
+                  <div
+                    className={`leaderboard-shimmer pointer-events-none absolute inset-0 ${
+                      rank === 1
+                        ? "leaderboard-shimmer--gold opacity-55"
+                        : rank === 2
+                          ? "leaderboard-shimmer--silver opacity-35"
+                          : "leaderboard-shimmer--bronze opacity-35"
+                    }`}
+                  />
                 )}
                 <div className="relative z-10 flex flex-col gap-3 p-2.5 sm:p-3 md:flex-row md:items-center md:gap-4 md:p-4">
                   <div className="flex items-center gap-3 min-w-0 max-sm:flex-col max-sm:items-start">

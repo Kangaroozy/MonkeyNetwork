@@ -95,3 +95,32 @@
   );
   animation: leaderboard-shimmer 2.2s linear infinite;
 }
+
+.leaderboard-shimmer--gold::before {
+  background: linear-gradient(
+    112deg,
+    rgba(255, 215, 0, 0) 12%,
+    rgba(255, 226, 121, 0.52) 43%,
+    rgba(255, 196, 0, 0.35) 52%,
+    rgba(255, 215, 0, 0) 74%
+  );
+  animation-duration: 1.9s;
+}
+
+.leaderboard-shimmer--silver::before {
+  background: linear-gradient(
+    110deg,
+    rgba(192, 192, 192, 0) 14%,
+    rgba(230, 230, 230, 0.4) 45%,
+    rgba(192, 192, 192, 0) 72%
+  );
+}
+
+.leaderboard-shimmer--bronze::before {
+  background: linear-gradient(
+    110deg,
+    rgba(205, 127, 50, 0) 14%,
+    rgba(230, 162, 108, 0.4) 45%,
+    rgba(205, 127, 50, 0) 72%
+  );
+}
