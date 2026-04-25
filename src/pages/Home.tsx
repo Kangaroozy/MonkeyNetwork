@@ -301,7 +301,7 @@ function LeaderboardSection() {
                 style={{ borderColor: palette.border, boxShadow: palette.glow }}
               >
                 <div className="relative z-10 flex flex-col gap-3 p-2.5 sm:p-3 md:flex-row md:items-center md:gap-4 md:p-4">
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 max-sm:flex-col max-sm:items-start">
                     <div className="group/rank relative h-16 w-28 sm:h-20 sm:w-36 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden shrink-0">
                       {isTop3 && (
                         <div className="leaderboard-shimmer absolute inset-0 opacity-0 transition-opacity duration-200 group-hover/rank:opacity-75" />
@@ -320,8 +320,8 @@ function LeaderboardSection() {
                       />
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 w-full">
+                      <div className="flex items-center gap-2 max-sm:flex-wrap">
                         {getRankIconPath(player.rankKey) && (
                           <img
                             src={getRankIconPath(player.rankKey)}
@@ -331,7 +331,7 @@ function LeaderboardSection() {
                           />
                         )}
                         <h3
-                          className="text-[17px] sm:text-[20px] md:text-[24px] font-extrabold truncate"
+                          className="text-[17px] sm:text-[20px] md:text-[24px] font-extrabold sm:truncate max-sm:break-all max-sm:whitespace-normal max-sm:leading-tight"
                           style={{ color: getNameColor(player.rankKey) }}
                         >
                           {player.username}

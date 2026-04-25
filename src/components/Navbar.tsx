@@ -138,7 +138,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-3" ref={searchRootRef}>
-          <div className="relative hidden sm:block w-[320px]">
+          <div className="relative hidden sm:block w-[280px] lg:w-[320px]">
             <div className="flex items-center bg-[#1A1A1F] border border-[rgba(255,255,255,0.06)] rounded-lg px-3 py-2 w-full focus-within:border-[#D4A843] transition-colors">
               <Search className="w-4 h-4 text-[#5A5A65] shrink-0 mr-2" />
               <input
@@ -177,7 +177,7 @@ export default function Navbar() {
                       />
                       <div className="flex-1 min-w-0">
                         <p
-                          className="text-[13px] font-semibold truncate flex items-center gap-1.5"
+                          className="text-[13px] font-semibold sm:truncate max-sm:whitespace-normal max-sm:break-all flex items-center gap-1.5"
                           style={{ color: getNameColor(player.rankKey) }}
                         >
                           <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
@@ -190,7 +190,7 @@ export default function Navbar() {
                               style={{ imageRendering: "pixelated" }}
                             />
                           )}
-                          <span className="truncate">{player.username}</span>
+                          <span className="sm:truncate max-sm:whitespace-normal max-sm:break-all">{player.username}</span>
                         </p>
                         <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
                       </div>

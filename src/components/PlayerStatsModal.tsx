@@ -53,7 +53,7 @@ export default function PlayerStatsModal() {
                 />
               )}
               <h3
-                className="text-xl sm:text-3xl font-extrabold truncate"
+                className="text-xl sm:text-3xl font-extrabold sm:truncate max-sm:break-all max-sm:whitespace-normal max-sm:leading-tight"
                 style={{ color: data ? getNameColor(data.rankKey) : "#F0F0F2" }}
               >
                 {data?.username ?? username}
