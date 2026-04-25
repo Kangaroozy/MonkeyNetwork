@@ -300,10 +300,12 @@ function LeaderboardSection() {
                 className="group relative w-full overflow-hidden rounded-2xl border bg-[#111114]/90 text-left transition-all duration-200 md:hover:-translate-x-3 md:hover:scale-[1.01] hover:bg-[#18181d] active:scale-[0.99]"
                 style={{ borderColor: palette.border, boxShadow: palette.glow }}
               >
-                {isTop3 && <div className="leaderboard-shimmer absolute inset-0 opacity-60" />}
                 <div className="relative z-10 flex flex-col gap-3 p-3 md:flex-row md:items-center md:gap-4 md:p-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative h-20 w-40 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                    <div className="group/rank relative h-20 w-40 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                      {isTop3 && (
+                        <div className="leaderboard-shimmer absolute inset-0 opacity-0 transition-opacity duration-200 group-hover/rank:opacity-75" />
+                      )}
                       <span
                         className="absolute left-2 bottom-1 text-[32px] font-black italic leading-none drop-shadow-[0_3px_2px_rgba(0,0,0,0.7)]"
                         style={{ color: palette.badge }}
@@ -312,14 +314,17 @@ function LeaderboardSection() {
                       </span>
                       <img
                         src={`https://mc-heads.net/body/${encodeURIComponent(player.username)}/right`}
-                        alt={`${player.username} skin`}
-                        className="absolute right-2 -bottom-1 h-[84px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
+                        alt={`${player.username} top-half skin`}
+                        className="absolute right-1 -top-2 h-[120px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
                         loading={rank <= 3 ? "eager" : "lazy"}
                       />
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
+                        {getRankIconPath(player.rankKey) && (
+                          <img src={getRankIconPath(player.rankKey)} alt="" className="h-5 w-auto shrink-0 object-contain" />
+                        )}
                         <h3
                           className="text-[20px] md:text-[24px] font-extrabold truncate"
                           style={{ color: getNameColor(player.rankKey) }}
@@ -331,9 +336,6 @@ function LeaderboardSection() {
                       <div className="mt-1 flex items-center gap-2 text-[13px] text-[#8A8A95]">
                         <img src={getStarIconPath(player.level)} alt="" className="w-4 h-4 object-contain" />
                         <span style={{ color: getLevelColor(player.level) }}>Level {formatNumber(player.level)}</span>
-                        {getRankIconPath(player.rankKey) && (
-                          <img src={getRankIconPath(player.rankKey)} alt="" className="h-4 w-auto object-contain" />
-                        )}
                       </div>
                     </div>
                   </div>
