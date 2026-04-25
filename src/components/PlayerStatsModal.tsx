@@ -43,7 +43,7 @@ export default function PlayerStatsModal() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#8A8A95]">Player Overview</p>
-            <div className="mt-1 flex items-center gap-2 min-w-0">
+            <div className="mt-1 flex items-start gap-2 min-w-0">
               {data && getRankIconPath(data.rankKey) && (
                 <img
                   src={getRankIconPath(data.rankKey)}
@@ -53,7 +53,7 @@ export default function PlayerStatsModal() {
                 />
               )}
               <h3
-                className="text-xl sm:text-3xl font-extrabold sm:truncate max-sm:break-all max-sm:whitespace-normal max-sm:leading-tight"
+                className="text-xl sm:text-3xl font-extrabold break-all whitespace-normal leading-tight"
                 style={{ color: data ? getNameColor(data.rankKey) : "#F0F0F2" }}
               >
                 {data?.username ?? username}

@@ -177,7 +177,7 @@ export default function Navbar() {
                       />
                       <div className="flex-1 min-w-0">
                         <p
-                          className="text-[13px] font-semibold sm:truncate max-sm:whitespace-normal max-sm:break-all flex items-center gap-1.5"
+                          className="text-[13px] font-semibold flex flex-wrap items-center gap-1.5 whitespace-normal break-all"
                           style={{ color: getNameColor(player.rankKey) }}
                         >
                           <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
@@ -190,7 +190,7 @@ export default function Navbar() {
                               style={{ imageRendering: "pixelated" }}
                             />
                           )}
-                          <span className="sm:truncate max-sm:whitespace-normal max-sm:break-all">{player.username}</span>
+                          <span className="whitespace-normal break-all">{player.username}</span>
                         </p>
                         <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
                       </div>
@@ -252,7 +252,7 @@ export default function Navbar() {
                       alt={player.username}
                       className="w-7 h-7 rounded"
                     />
-                    <span className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: getNameColor(player.rankKey) }}>
+                    <span className="text-[13px] font-medium flex flex-wrap items-center gap-1.5 whitespace-normal break-all" style={{ color: getNameColor(player.rankKey) }}>
                       <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
                       <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
                       {getRankIconPath(player.rankKey) && (
@@ -263,7 +263,7 @@ export default function Navbar() {
                           style={{ imageRendering: "pixelated" }}
                         />
                       )}
-                      <span>{player.username}</span>
+                      <span className="whitespace-normal break-all">{player.username}</span>
                     </span>
                   </button>
                 ))

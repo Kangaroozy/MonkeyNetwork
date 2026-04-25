@@ -321,22 +321,24 @@ function LeaderboardSection() {
                     </div>
 
                     <div className="min-w-0 w-full">
-                      <div className="flex items-center gap-2 max-sm:flex-wrap">
-                        {getRankIconPath(player.rankKey) && (
-                          <img
-                            src={getRankIconPath(player.rankKey)}
-                            alt=""
-                            className="h-7 w-auto shrink-0 object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.65)]"
-                            style={{ imageRendering: "pixelated" }}
-                          />
-                        )}
+                      <div className="flex items-start gap-2 max-lg:flex-col">
+                        <div className="flex items-center gap-2">
+                          {getRankIconPath(player.rankKey) && (
+                            <img
+                              src={getRankIconPath(player.rankKey)}
+                              alt=""
+                              className="h-7 w-auto shrink-0 object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.65)]"
+                              style={{ imageRendering: "pixelated" }}
+                            />
+                          )}
+                          {isTop3 && <Crown className="w-4 h-4 shrink-0" style={{ color: palette.badge }} />}
+                        </div>
                         <h3
-                          className="text-[17px] sm:text-[20px] md:text-[24px] font-extrabold sm:truncate max-sm:break-all max-sm:whitespace-normal max-sm:leading-tight"
+                          className="text-[17px] sm:text-[20px] md:text-[24px] font-extrabold break-all whitespace-normal leading-tight"
                           style={{ color: getNameColor(player.rankKey) }}
                         >
                           {player.username}
                         </h3>
-                        {isTop3 && <Crown className="w-4 h-4 shrink-0" style={{ color: palette.badge }} />}
                       </div>
                       <div className="mt-1 flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] text-[#8A8A95]">
                         <img src={getStarIconPath(player.level)} alt="" className="w-4 h-4 object-contain" />
