@@ -302,7 +302,7 @@ function LeaderboardSection() {
               >
                 <div className="relative z-10 flex flex-col gap-3 p-3 md:flex-row md:items-center md:gap-4 md:p-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="group/rank relative h-20 w-40 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                    <div className="group/rank relative h-20 w-36 rounded-lg bg-[#0c0c10] border border-[rgba(255,255,255,0.08)] overflow-hidden">
                       {isTop3 && (
                         <div className="leaderboard-shimmer absolute inset-0 opacity-0 transition-opacity duration-200 group-hover/rank:opacity-75" />
                       )}
@@ -315,7 +315,7 @@ function LeaderboardSection() {
                       <img
                         src={`https://mc-heads.net/body/${encodeURIComponent(player.username)}/right`}
                         alt={`${player.username} top-half skin`}
-                        className="absolute right-1 -top-2 h-[120px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
+                        className="absolute right-7 top-1 h-[116px] w-auto drop-shadow-[-4px_-2px_2px_rgba(0,0,0,0.45)]"
                         loading={rank <= 3 ? "eager" : "lazy"}
                       />
                     </div>
@@ -323,7 +323,13 @@ function LeaderboardSection() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         {getRankIconPath(player.rankKey) && (
-                          <img src={getRankIconPath(player.rankKey)} alt="" className="h-5 w-auto shrink-0 object-contain" />
+                          <span className="inline-flex h-6 items-center rounded-md bg-black/25 px-1.5 ring-1 ring-white/10 shrink-0">
+                            <img
+                              src={getRankIconPath(player.rankKey)}
+                              alt=""
+                              className="h-4.5 max-h-[18px] w-auto object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.65)]"
+                            />
+                          </span>
                         )}
                         <h3
                           className="text-[20px] md:text-[24px] font-extrabold truncate"

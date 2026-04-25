@@ -51,7 +51,12 @@ const LEVEL_PALETTES: LevelPalette[] = [
 ];
 
 function normalizeRank(rankKey: string | null | undefined): string {
-  return (rankKey ?? "default").trim().toLowerCase();
+  return (rankKey ?? "default")
+    .trim()
+    .toLowerCase()
+    .replace(/^rank[_-]/, "")
+    .replace(/\s+/g, "")
+    .replace(/[_-]/g, "");
 }
 
 function resolveLevelPalette(level: number | null | undefined): LevelPalette {
@@ -61,7 +66,38 @@ function resolveLevelPalette(level: number | null | undefined): LevelPalette {
 
 export function getRankIconPath(rankKey: string | null | undefined): string {
   const group = normalizeRank(rankKey);
-  return RANK_ICON_BY_GROUP[group] ?? "";
+  const direct = RANK_ICON_BY_GROUP[group];
+  if (direct) {
+    return direct;
+  }
+  if (group === "default") {
+    return "";
+  }
+  if (group.includes("vip")) {
+    return "/assets/rank-icons/rank_vip_base.png";
+  }
+  if (group.includes("dev")) {
+    return "/assets/rank-icons/rank_developer.png";
+  }
+  if (group.includes("boost")) {
+    return "/assets/rank-icons/rank_booster.png";
+  }
+  if (group.includes("helper")) {
+    return "/assets/rank-icons/rank_helper.png";
+  }
+  if (group.includes("media") || group.includes("youtube") || group.includes("twitch")) {
+    return "/assets/rank-icons/rank_media.png";
+  }
+  if (group.includes("mod")) {
+    return "/assets/rank-icons/rank_mod.png";
+  }
+  if (group.includes("admin")) {
+    return "/assets/rank-icons/rank_admin.png";
+  }
+  if (group.includes("owner")) {
+    return "/assets/rank-icons/rank_owner.png";
+  }
+  return "";
 }
 
 export function getNameColor(rankKey: string | null | undefined): string {
