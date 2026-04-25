@@ -91,7 +91,7 @@ export const leaderboardRouter = createRouter({
               "totalKills",
               "matchesPlayed",
             ])
-            .default("totalKills"),
+            .default("kda"),
           sortOrder: z.enum(["asc", "desc"]).default("desc"),
         })
         .superRefine((value, ctx) => {

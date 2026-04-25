@@ -140,7 +140,7 @@ function LeaderboardSection() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<
     "username" | "wins" | "winRate" | "kda" | "deaths" | "killAverage" | "totalKills" | "matchesPlayed"
-  >("totalKills");
+  >("kda");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data: filterData } = trpc.leaderboard.filters.useQuery({
