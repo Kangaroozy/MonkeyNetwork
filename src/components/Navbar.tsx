@@ -15,18 +15,27 @@ type SearchPlayer = {
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const searchRootRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
-  const { data: searchResults } = trpc.player.search.useQuery(
-    { query: searchQuery, limit: 8 },
-    { enabled: searchQuery.trim().length >= 1 }
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 140);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: searchResults, isFetching: isSearching } = trpc.player.search.useQuery(
+    { query: debouncedQuery, limit: 8 },
+    { enabled: debouncedQuery.length >= 1 }
   );
   useEffect(() => {
     const handleScroll = () => {
@@ -43,6 +52,7 @@ export default function Navbar() {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRootRef.current && !searchRootRef.current.contains(event.target as Node)) {
         setActiveSuggestionIndex(-1);
+        setSearchFocused(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -50,17 +60,20 @@ export default function Navbar() {
   }, []);
 
   const suggestionList = searchResults ?? [];
-  const suggestionsVisible = searchQuery.trim().length >= 1 && suggestionList.length > 0;
+  const hasQuery = debouncedQuery.length >= 1;
+  const suggestionsVisible = hasQuery && (searchFocused || showSearch);
 
   const handleSearchPick = (player: SearchPlayer) => {
     setSearchQuery("");
+    setDebouncedQuery("");
     setShowSearch(false);
+    setSearchFocused(false);
     setActiveSuggestionIndex(-1);
     openPlayerModal(player.username);
   };
 
   const handleSearchKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
-    if (!suggestionsVisible) {
+    if (!suggestionsVisible || suggestionList.length === 0) {
       return;
     }
     if (event.key === "ArrowDown") {
@@ -76,6 +89,11 @@ export default function Navbar() {
     if (event.key === "Enter" && activeSuggestionIndex >= 0 && activeSuggestionIndex < suggestionList.length) {
       event.preventDefault();
       handleSearchPick(suggestionList[activeSuggestionIndex] as SearchPlayer);
+      return;
+    }
+    if (event.key === "Enter" && suggestionList.length > 0) {
+      event.preventDefault();
+      handleSearchPick(suggestionList[0] as SearchPlayer);
     }
   };
 
@@ -131,47 +149,54 @@ export default function Navbar() {
                   setSearchQuery(e.target.value);
                   setActiveSuggestionIndex(-1);
                 }}
+                onFocus={() => setSearchFocused(true)}
                 onKeyDown={handleSearchKeyDown}
                 className="bg-transparent text-[13px] text-[#F0F0F2] placeholder-[#5A5A65] outline-none w-full"
               />
             </div>
             {suggestionsVisible && (
               <div className="absolute top-full mt-2 left-0 right-0 bg-[#1A1A1F] border border-[rgba(255,255,255,0.06)] rounded-xl overflow-hidden shadow-2xl transition-all duration-150">
-                {suggestionList.map((player, index) => (
-                  <button
-                    key={player.id}
-                    onClick={() => handleSearchPick(player as SearchPlayer)}
-                    className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
-                    style={{
-                      backgroundColor: activeSuggestionIndex === index ? "rgba(255,255,255,0.06)" : "transparent",
-                    }}
-                  >
-                    <img
-                      src={player.avatarUrl || `https://mc-heads.net/avatar/${player.username}`}
-                      alt={player.username}
-                      className="w-8 h-8 rounded"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="text-[13px] font-semibold truncate flex items-center gap-1.5"
-                        style={{ color: getNameColor(player.rankKey) }}
-                      >
-                        <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
-                        <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
-                        {getRankIconPath(player.rankKey) && (
-                          <img
-                            src={getRankIconPath(player.rankKey)}
-                            alt=""
-                            className="h-5 w-auto object-contain"
-                            style={{ imageRendering: "pixelated" }}
-                          />
-                        )}
-                        <span className="truncate">{player.username}</span>
-                      </p>
-                      <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
-                    </div>
-                  </button>
-                ))}
+                {isSearching ? (
+                  <div className="px-4 py-3 text-[12px] text-[#8A8A95]">Searching players...</div>
+                ) : suggestionList.length === 0 ? (
+                  <div className="px-4 py-3 text-[12px] text-[#8A8A95]">No players found for "{debouncedQuery}".</div>
+                ) : (
+                  suggestionList.map((player, index) => (
+                    <button
+                      key={player.id}
+                      onClick={() => handleSearchPick(player as SearchPlayer)}
+                      className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left"
+                      style={{
+                        backgroundColor: activeSuggestionIndex === index ? "rgba(255,255,255,0.06)" : "transparent",
+                      }}
+                    >
+                      <img
+                        src={player.avatarUrl || `https://mc-heads.net/avatar/${player.username}`}
+                        alt={player.username}
+                        className="w-8 h-8 rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-[13px] font-semibold truncate flex items-center gap-1.5"
+                          style={{ color: getNameColor(player.rankKey) }}
+                        >
+                          <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
+                          <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
+                          {getRankIconPath(player.rankKey) && (
+                            <img
+                              src={getRankIconPath(player.rankKey)}
+                              alt=""
+                              className="h-5 w-auto object-contain"
+                              style={{ imageRendering: "pixelated" }}
+                            />
+                          )}
+                          <span className="truncate">{player.username}</span>
+                        </p>
+                        <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
             )}
           </div>
@@ -204,38 +229,45 @@ export default function Navbar() {
                 setSearchQuery(e.target.value);
                 setActiveSuggestionIndex(-1);
               }}
+              onFocus={() => setSearchFocused(true)}
               className="bg-transparent text-[13px] text-[#F0F0F2] placeholder-[#5A5A65] outline-none w-full"
               autoFocus
             />
           </div>
           {suggestionsVisible && (
             <div className="mt-2 max-h-[300px] overflow-y-auto">
-              {suggestionList.map((player) => (
-                <button
-                  key={player.id}
-                  onClick={() => handleSearchPick(player as SearchPlayer)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#222228] transition-colors text-left rounded-lg"
-                >
-                  <img
-                    src={player.avatarUrl || `https://mc-heads.net/avatar/${player.username}`}
-                    alt={player.username}
-                    className="w-7 h-7 rounded"
-                  />
-                  <span className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: getNameColor(player.rankKey) }}>
-                    <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
-                    <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
-                    {getRankIconPath(player.rankKey) && (
-                      <img
-                        src={getRankIconPath(player.rankKey)}
-                        alt=""
-                        className="h-5 w-auto object-contain"
-                        style={{ imageRendering: "pixelated" }}
-                      />
-                    )}
-                    <span>{player.username}</span>
-                  </span>
-                </button>
-              ))}
+              {isSearching ? (
+                <div className="px-3 py-2.5 text-[12px] text-[#8A8A95]">Searching players...</div>
+              ) : suggestionList.length === 0 ? (
+                <div className="px-3 py-2.5 text-[12px] text-[#8A8A95]">No players found for "{debouncedQuery}".</div>
+              ) : (
+                suggestionList.map((player) => (
+                  <button
+                    key={player.id}
+                    onClick={() => handleSearchPick(player as SearchPlayer)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#222228] transition-colors text-left rounded-lg"
+                  >
+                    <img
+                      src={player.avatarUrl || `https://mc-heads.net/avatar/${player.username}`}
+                      alt={player.username}
+                      className="w-7 h-7 rounded"
+                    />
+                    <span className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: getNameColor(player.rankKey) }}>
+                      <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
+                      <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
+                      {getRankIconPath(player.rankKey) && (
+                        <img
+                          src={getRankIconPath(player.rankKey)}
+                          alt=""
+                          className="h-5 w-auto object-contain"
+                          style={{ imageRendering: "pixelated" }}
+                        />
+                      )}
+                      <span>{player.username}</span>
+                    </span>
+                  </button>
+                ))
+              )}
             </div>
           )}
         </div>

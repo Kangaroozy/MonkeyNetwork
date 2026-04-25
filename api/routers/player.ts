@@ -32,6 +32,37 @@ function toHeadAvatarUrl(avatarUrl: string | null | undefined, idOrUsername: str
   return `https://mc-heads.net/avatar/${encodeURIComponent(idOrUsername)}/64`;
 }
 
+function xpRequiredForLevel(level: number): number {
+  if (level >= 1000) {
+    return 0;
+  }
+  if (level <= 1) {
+    return 500;
+  }
+  if (level === 2) {
+    return 750;
+  }
+  if (level === 3) {
+    return 1000;
+  }
+  if (level === 4) {
+    return 1250;
+  }
+  if (level === 5) {
+    return 1500;
+  }
+  if (level === 6) {
+    return 1750;
+  }
+  if (level === 7) {
+    return 2000;
+  }
+  if (level === 8) {
+    return 2500;
+  }
+  return 3000;
+}
+
 export const playerRouter = createRouter({
   search: publicQuery
     .input(z.object({
@@ -109,6 +140,7 @@ export const playerRouter = createRouter({
           target.skin_url AS avatarUrl,
           COALESCE(profile.rank, 'default') AS rankKey,
           COALESCE(profile.level, 1) AS level,
+          COALESCE(profile.exp, 0) AS exp,
           COALESCE(agg.wins, 0) AS wins,
           COALESCE(agg.losses, 0) AS losses,
           COALESCE(agg.kills, 0) AS kills,
@@ -124,6 +156,7 @@ export const playerRouter = createRouter({
         avatarUrl: string | null;
         rankKey: string | null;
         level: number | null;
+        exp: number | null;
         wins: number;
         losses: number;
         kills: number;
@@ -137,6 +170,9 @@ export const playerRouter = createRouter({
       const deaths = Number(row.deaths ?? 0);
       const matchesPlayed = Number(row.matchesPlayed ?? 0);
       const wins = Number(row.wins ?? 0);
+      const level = Number(row.level ?? 1);
+      const expCurrent = Number(row.exp ?? 0);
+      const expRequired = xpRequiredForLevel(level);
       const winRate = matchesPlayed > 0 ? wins / matchesPlayed : 0;
       const kda = deaths > 0 ? kills / deaths : kills;
       const killAverage = matchesPlayed > 0 ? kills / matchesPlayed : 0;
@@ -146,7 +182,10 @@ export const playerRouter = createRouter({
         ...row,
         avatarUrl: toHeadAvatarUrl(row.avatarUrl, row.id || row.username),
         rankKey: luckPermsGroups.get((row.id ?? "").toLowerCase()) ?? fallbackRank,
-        level: Number(row.level ?? 1),
+        level,
+        expCurrent,
+        expRequired,
+        expProgress: expRequired > 0 ? Math.max(0, Math.min(1, expCurrent / expRequired)) : 1,
         wins,
         losses: Number(row.losses ?? 0),
         kills,
