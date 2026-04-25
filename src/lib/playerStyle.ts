@@ -1,17 +1,17 @@
 const NAME_COLOR_DEFAULT = "#8a8a8a";
 
-const RANK_EMOJI_BY_GROUP: Record<string, string> = {
-  vip: "⭐",
-  "vip+": "⭐",
-  developer: "💻",
-  booster: "⚡",
-  helper: "🛠️",
-  moderator: "🛡️",
-  mod: "🛡️",
-  owner: "👑",
-  admin: "🛡️",
-  media: "🎥",
-  mediaplus: "🎥",
+const RANK_ICON_BY_GROUP: Record<string, string> = {
+  vip: "/assets/rank-icons/rank_vip_base.png",
+  "vip+": "/assets/rank-icons/rank_vip_base.png",
+  developer: "/assets/rank-icons/rank_developer.png",
+  booster: "/assets/rank-icons/rank_booster.png",
+  helper: "/assets/rank-icons/rank_helper.png",
+  moderator: "/assets/rank-icons/rank_mod.png",
+  mod: "/assets/rank-icons/rank_mod.png",
+  owner: "/assets/rank-icons/rank_owner.png",
+  admin: "/assets/rank-icons/rank_admin.png",
+  media: "/assets/rank-icons/rank_media.png",
+  mediaplus: "/assets/rank-icons/rank_media.png",
 };
 
 const NAME_COLOR_BY_GROUP: Record<string, string> = {
@@ -33,20 +33,21 @@ type LevelPalette = {
   minLevel: number;
   levelColor: string;
   starColor: string;
+  starIcon: string;
 };
 
 const LEVEL_PALETTES: LevelPalette[] = [
-  { minLevel: 1000, levelColor: "#ff55ff", starColor: "#ff55ff" },
-  { minLevel: 900, levelColor: "#aa0000", starColor: "#aa0000" },
-  { minLevel: 800, levelColor: "#aa00aa", starColor: "#aa00aa" },
-  { minLevel: 700, levelColor: "#5555ff", starColor: "#5555ff" },
-  { minLevel: 600, levelColor: "#55ffff", starColor: "#55ffff" },
-  { minLevel: 500, levelColor: "#ff5fc8", starColor: "#ff5fc8" },
-  { minLevel: 400, levelColor: "#55ff55", starColor: "#55ff55" },
-  { minLevel: 300, levelColor: "#ffaa00", starColor: "#ffaa00" },
-  { minLevel: 200, levelColor: "#ffff55", starColor: "#ffff55" },
-  { minLevel: 100, levelColor: "#ffffff", starColor: "#ffffff" },
-  { minLevel: 0, levelColor: "#aaaaaa", starColor: "#aaaaaa" },
+  { minLevel: 1000, levelColor: "#ff55ff", starColor: "#ff55ff", starIcon: "/assets/star-icons/star_rainbow.png" },
+  { minLevel: 900, levelColor: "#aa0000", starColor: "#aa0000", starIcon: "/assets/star-icons/star_dark_red.png" },
+  { minLevel: 800, levelColor: "#aa00aa", starColor: "#aa00aa", starIcon: "/assets/star-icons/star_purple.png" },
+  { minLevel: 700, levelColor: "#5555ff", starColor: "#5555ff", starIcon: "/assets/star-icons/star_blue.png" },
+  { minLevel: 600, levelColor: "#55ffff", starColor: "#55ffff", starIcon: "/assets/star-icons/star_aqua.png" },
+  { minLevel: 500, levelColor: "#ff5fc8", starColor: "#ff5fc8", starIcon: "/assets/star-icons/star_pink.png" },
+  { minLevel: 400, levelColor: "#55ff55", starColor: "#55ff55", starIcon: "/assets/star-icons/star_green.png" },
+  { minLevel: 300, levelColor: "#ffaa00", starColor: "#ffaa00", starIcon: "/assets/star-icons/star_orange.png" },
+  { minLevel: 200, levelColor: "#ffff55", starColor: "#ffff55", starIcon: "/assets/star-icons/star_yellow.png" },
+  { minLevel: 100, levelColor: "#ffffff", starColor: "#ffffff", starIcon: "/assets/star-icons/star_white.png" },
+  { minLevel: 0, levelColor: "#aaaaaa", starColor: "#aaaaaa", starIcon: "/assets/star-icons/star_gray.png" },
 ];
 
 function normalizeRank(rankKey: string | null | undefined): string {
@@ -58,9 +59,9 @@ function resolveLevelPalette(level: number | null | undefined): LevelPalette {
   return LEVEL_PALETTES.find((entry) => safeLevel >= entry.minLevel) ?? LEVEL_PALETTES[LEVEL_PALETTES.length - 1];
 }
 
-export function getRankEmoji(rankKey: string | null | undefined): string {
+export function getRankIconPath(rankKey: string | null | undefined): string {
   const group = normalizeRank(rankKey);
-  return RANK_EMOJI_BY_GROUP[group] ?? "";
+  return RANK_ICON_BY_GROUP[group] ?? "";
 }
 
 export function getNameColor(rankKey: string | null | undefined): string {
@@ -74,4 +75,8 @@ export function getLevelColor(level: number | null | undefined): string {
 
 export function getStarColor(level: number | null | undefined): string {
   return resolveLevelPalette(level).starColor;
+}
+
+export function getStarIconPath(level: number | null | undefined): string {
+  return resolveLevelPalette(level).starIcon;
 }

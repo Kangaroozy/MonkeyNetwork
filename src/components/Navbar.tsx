@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 import { Search, Menu, X, Crown } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { openPlayerModal } from "@/lib/playerModal";
-import { getLevelColor, getNameColor, getRankEmoji, getStarColor } from "@/lib/playerStyle";
+import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
 
 type SearchPlayer = {
   id: string;
@@ -157,8 +157,10 @@ export default function Navbar() {
                         style={{ color: getNameColor(player.rankKey) }}
                       >
                         <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
-                        <span style={{ color: getStarColor(player.level) }}>★</span>
-                        {getRankEmoji(player.rankKey) && <span>{getRankEmoji(player.rankKey)}</span>}
+                        <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
+                        {getRankIconPath(player.rankKey) && (
+                          <img src={getRankIconPath(player.rankKey)} alt="" className="h-3.5 w-auto object-contain" />
+                        )}
                         <span className="truncate">{player.username}</span>
                       </p>
                       <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
@@ -216,8 +218,10 @@ export default function Navbar() {
                   />
                   <span className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: getNameColor(player.rankKey) }}>
                     <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
-                    <span style={{ color: getStarColor(player.level) }}>★</span>
-                    {getRankEmoji(player.rankKey) && <span>{getRankEmoji(player.rankKey)}</span>}
+                    <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
+                    {getRankIconPath(player.rankKey) && (
+                      <img src={getRankIconPath(player.rankKey)} alt="" className="h-3.5 w-auto object-contain" />
+                    )}
                     <span>{player.username}</span>
                   </span>
                 </button>

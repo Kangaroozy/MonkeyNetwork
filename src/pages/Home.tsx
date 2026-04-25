@@ -3,7 +3,7 @@ import { Crown, ChevronDown, ChevronLeft, ChevronRight, Gamepad2 } from "lucide-
 import { trpc } from "@/providers/trpc";
 import { formatNumber, formatWinRate, modeColor, modeLabel } from "@/lib/tiers";
 import { openPlayerModal } from "@/lib/playerModal";
-import { getLevelColor, getNameColor, getRankEmoji, getStarColor } from "@/lib/playerStyle";
+import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
 import gsap from "gsap";
 
 type LeaderboardEntry = {
@@ -305,8 +305,10 @@ function LeaderboardSection() {
                           />
                           <div className="text-[14px] font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-1.5">
                             <span style={{ color: getLevelColor(player.level) }}>{player.level}</span>
-                            <span style={{ color: getStarColor(player.level) }}>★</span>
-                            {getRankEmoji(player.rankKey) && <span>{getRankEmoji(player.rankKey)}</span>}
+                            <img src={getStarIconPath(player.level)} alt="" className="w-3.5 h-3.5 object-contain" />
+                            {getRankIconPath(player.rankKey) && (
+                              <img src={getRankIconPath(player.rankKey)} alt="" className="h-3.5 w-auto object-contain" />
+                            )}
                             <span style={{ color: getNameColor(player.rankKey) }}>{player.username}</span>
                           </div>
                         </div>
