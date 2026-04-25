@@ -97,6 +97,7 @@
 }
 
 .leaderboard-shimmer--gold::before {
+  animation: leaderboard-shimmer 2.2s linear infinite;
   background: linear-gradient(
     112deg,
     rgba(255, 215, 0, 0) 12%,
@@ -104,10 +105,10 @@
     rgba(255, 196, 0, 0.35) 52%,
     rgba(255, 215, 0, 0) 74%
   );
-  animation-duration: 1.9s;
 }
 
 .leaderboard-shimmer--silver::before {
+  animation: leaderboard-shimmer 2.2s linear infinite;
   background: linear-gradient(
     110deg,
     rgba(192, 192, 192, 0) 14%,
@@ -117,6 +118,7 @@
 }
 
 .leaderboard-shimmer--bronze::before {
+  animation: leaderboard-shimmer 2.2s linear infinite;
   background: linear-gradient(
     110deg,
     rgba(205, 127, 50, 0) 14%,
