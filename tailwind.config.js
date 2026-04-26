@@ -4,7 +4,26 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Outfit", "system-ui", "sans-serif"],
+        /** Same as sans: reserved for headings so we can tune tracking/weight without a separate wide face (e.g. Syne) */
+        display: ["Outfit", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+      },
       colors: {
+        mn: {
+          void: "#050806",
+          canopy: "#0A0F0C",
+          moss: "#121A15",
+          leaf: "#1A2620",
+          mist: "#E8EDE5",
+          fog: "#9BA39A",
+          dim: "#5C6658",
+          lime: "#C4FF4D",
+          "lime-muted": "#9ED636",
+          teal: "#2EC4B6",
+          bark: "#3D2E1F",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

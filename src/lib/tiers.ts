@@ -11,12 +11,12 @@ export const TIER_COLORS: Record<string, string> = {
 };
 
 export const MODE_COLORS: Record<string, string> = {
-  overall: "#D4A843",
+  overall: "#C4FF4D",
   vanilla: "#2ECC71",
   uhc: "#9B59B6",
   sword: "#E74C3C",
   axe: "#3498DB",
-  smp: "#D4A843",
+  smp: "#C4FF4D",
   pot: "#E74C3C",
   ltms: "#9B59B6",
 };

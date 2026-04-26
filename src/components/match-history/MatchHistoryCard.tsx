@@ -11,46 +11,68 @@ type Props = {
   view?: "global" | "player";
 };
 
-function getVisualTone(
-  match: MatchListItem,
-  view: "global" | "player",
-): { border: string; glow: string; badge: string; label: string } {
+type MatchTone = {
+  border: string;
+  glow: string;
+  orb: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+  label: string;
+};
+
+function getVisualTone(match: MatchListItem, view: "global" | "player"): MatchTone {
   if (view === "global") {
     if ((match.kills ?? 0) >= 7) {
       return {
-        border: "rgba(155, 89, 182, 0.9)",
-        glow: "0 0 34px rgba(155, 89, 182, 0.18)",
-        badge: "rgba(155, 89, 182, 0.2)",
+        border: "rgba(72, 245, 225, 0.85)",
+        glow: "0 0 36px rgba(64, 235, 215, 0.42)",
+        orb: "rgba(64, 220, 200, 0.45)",
+        badgeBg: "rgba(52, 210, 190, 0.35)",
+        badgeText: "#E8FFFC",
+        badgeBorder: "rgba(130, 250, 235, 0.65)",
         label: "High Kill Winner",
       };
     }
     return {
-      border: "rgba(212, 168, 67, 0.85)",
-      glow: "0 0 38px rgba(212, 168, 67, 0.18)",
-      badge: "rgba(212, 168, 67, 0.2)",
+      border: "rgba(200, 255, 95, 0.88)",
+      glow: "0 0 40px rgba(196, 255, 77, 0.45)",
+      orb: "rgba(196, 255, 77, 0.4)",
+      badgeBg: "rgba(196, 255, 77, 0.32)",
+      badgeText: "#F5FFCC",
+      badgeBorder: "rgba(220, 255, 130, 0.7)",
       label: "Match Winner",
     };
   }
   if (match.result === "WIN") {
     return {
-      border: "rgba(212, 168, 67, 0.85)",
-      glow: "0 0 38px rgba(212, 168, 67, 0.18)",
-      badge: "rgba(212, 168, 67, 0.2)",
+      border: "rgba(200, 255, 95, 0.88)",
+      glow: "0 0 40px rgba(196, 255, 77, 0.45)",
+      orb: "rgba(196, 255, 77, 0.4)",
+      badgeBg: "rgba(196, 255, 77, 0.32)",
+      badgeText: "#F5FFCC",
+      badgeBorder: "rgba(220, 255, 130, 0.7)",
       label: "#1 Victory",
     };
   }
   if ((match.kills ?? 0) >= 7) {
     return {
-      border: "rgba(155, 89, 182, 0.9)",
-      glow: "0 0 34px rgba(155, 89, 182, 0.18)",
-      badge: "rgba(155, 89, 182, 0.2)",
+      border: "rgba(72, 245, 225, 0.85)",
+      glow: "0 0 36px rgba(64, 235, 215, 0.42)",
+      orb: "rgba(64, 220, 200, 0.45)",
+      badgeBg: "rgba(52, 210, 190, 0.35)",
+      badgeText: "#E8FFFC",
+      badgeBorder: "rgba(130, 250, 235, 0.65)",
       label: "High Kill Run",
     };
   }
   return {
-    border: "rgba(231, 76, 60, 0.72)",
-    glow: "0 0 30px rgba(231, 76, 60, 0.12)",
-    badge: "rgba(231, 76, 60, 0.2)",
+    border: "rgba(255, 118, 132, 0.88)",
+    glow: "0 0 36px rgba(255, 95, 115, 0.38)",
+    orb: "rgba(255, 100, 118, 0.42)",
+    badgeBg: "rgba(255, 95, 110, 0.34)",
+    badgeText: "#FFEBEE",
+    badgeBorder: "rgba(255, 170, 180, 0.72)",
     label: "Eliminated",
   };
 }
@@ -71,22 +93,29 @@ export default function MatchHistoryCard({ match, showPrimaryPlayer = true, comp
 
   return (
     <div
-      className="relative overflow-hidden bg-[#111114] border rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:bg-[#16161C]"
+      className="relative overflow-hidden bg-mn-moss border rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:bg-mn-leaf"
       style={{ borderColor: tone.border, boxShadow: tone.glow }}
     >
-      <div className="absolute -top-10 right-0 w-36 h-36 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: tone.badge }} />
+      <div className="absolute -top-10 right-0 w-36 h-36 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: tone.orb }} />
 
       <div className="relative">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <span className="text-[10px] uppercase tracking-[0.1em] px-2 py-1 rounded-full text-[#F0F0F2]" style={{ backgroundColor: tone.badge }}>
+            <span
+              className="text-[10px] uppercase tracking-[0.1em] px-2.5 py-1 rounded-full font-semibold border shadow-[0_1px_2px_rgba(0,0,0,0.25)]"
+              style={{
+                backgroundColor: tone.badgeBg,
+                color: tone.badgeText,
+                borderColor: tone.badgeBorder,
+              }}
+            >
               {tone.label}
             </span>
             <span className="text-[10px] uppercase tracking-[0.1em] px-2 py-1 rounded-full bg-[rgba(255,255,255,0.08)] text-[#CFCFD6]">
               {match.modeName}
             </span>
           </div>
-          <span className="text-[10px] uppercase tracking-[0.12em] text-[#5A5A65] shrink-0">Match {shortMatchId}</span>
+          <span className="text-[10px] uppercase tracking-[0.12em] text-mn-dim shrink-0">Match {shortMatchId}</span>
         </div>
 
         {view === "global" && (
@@ -113,7 +142,7 @@ export default function MatchHistoryCard({ match, showPrimaryPlayer = true, comp
                   {showPrimaryPlayer && match.playerUsername && (
                     <>
                       <span className="text-[#6E6E79]">Player:</span>
-                      <Link to={`/player/${encodeURIComponent(match.playerUsername)}`} className="text-[#D4A843] hover:underline font-medium">
+                      <Link to={`/player/${encodeURIComponent(match.playerUsername)}`} className="text-mn-lime hover:underline font-medium">
                         {match.playerUsername}
                       </Link>
                     </>
@@ -121,7 +150,7 @@ export default function MatchHistoryCard({ match, showPrimaryPlayer = true, comp
                   {match.result !== "WIN" && killedByName.length > 0 ? (
                     <>
                       <span className="text-[#6E6E79]">{showPrimaryPlayer && match.playerUsername ? "• Killed By:" : "Killed By:"}</span>
-                      <Link to={`/player/${encodeURIComponent(killedByName)}`} className="text-[#F0F0F2] hover:underline font-medium">
+                      <Link to={`/player/${encodeURIComponent(killedByName)}`} className="text-mn-mist hover:underline font-medium">
                         {killedByName}
                       </Link>
                     </>
@@ -138,7 +167,7 @@ export default function MatchHistoryCard({ match, showPrimaryPlayer = true, comp
             {!compact && (
               <button
                 onClick={() => setExpanded((prev) => !prev)}
-                className="px-3 py-2 text-[12px] rounded-lg border border-[rgba(255,255,255,0.12)] text-[#D0D0D7] hover:text-[#F0F0F2] hover:bg-[#1A1A1F] transition-colors"
+                className="px-3 py-2 text-[12px] rounded-lg border border-white/12 text-mn-fog hover:text-mn-mist hover:bg-mn-leaf transition-colors"
               >
                 {expanded ? "Hide Details" : "Match Breakdown"}
               </button>
@@ -154,9 +183,9 @@ export default function MatchHistoryCard({ match, showPrimaryPlayer = true, comp
 
 function Metric({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#0F0F13] px-3 py-2 text-center">
-      <p className="text-[10px] uppercase tracking-[0.08em] text-[#5A5A65] mb-1">{label}</p>
-      <p className="text-[18px] font-bold leading-none" style={{ color: highlight ? "#D4A843" : "#F0F0F2" }}>
+    <div className="rounded-xl border border-white/[0.07] bg-mn-void px-3 py-2 text-center">
+      <p className="text-[10px] uppercase tracking-[0.08em] text-mn-dim mb-1">{label}</p>
+      <p className="text-[18px] font-bold leading-none" style={{ color: highlight ? "#C4FF4D" : "#E8EDE5" }}>
         {value}
       </p>
     </div>
@@ -172,7 +201,7 @@ function WinnerBlock({ match }: { match: MatchListItem }) {
   return (
     <Link
       to={`/player/${encodeURIComponent(username)}`}
-      className="group/winner w-full max-w-[560px] rounded-2xl border border-[rgba(212,168,67,0.45)] bg-[linear-gradient(135deg,#18130a_0%,#141418_45%,#1a1522_100%)] px-4 py-3.5 hover:bg-[#1C1A20] transition-colors shadow-[0_0_35px_rgba(212,168,67,0.14)]"
+      className="group/winner w-full max-w-[560px] rounded-2xl border border-[rgba(200,255,95,0.55)] bg-[linear-gradient(135deg,#0f160f_0%,#0a0f0c_45%,#0c1412_100%)] px-4 py-3.5 hover:bg-mn-leaf/40 transition-colors shadow-[0_0_40px_rgba(196,255,77,0.28)]"
     >
       <div className="flex items-center gap-4">
         <div className="relative h-24 w-24 overflow-hidden">
@@ -185,7 +214,9 @@ function WinnerBlock({ match }: { match: MatchListItem }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] uppercase tracking-[0.1em] text-[#C39A3A] mb-1">Victory</p>
+          <p className="text-[10px] uppercase tracking-[0.1em] font-semibold mb-1 text-[#E8FF9A] drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+            Victory
+          </p>
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             {rankIcon && (
               <img
@@ -195,7 +226,7 @@ function WinnerBlock({ match }: { match: MatchListItem }) {
                 style={{ imageRendering: "pixelated" }}
               />
             )}
-            <span className="text-[22px] sm:text-[24px] font-extrabold leading-none truncate" style={{ color: getNameColor(match.playerRankKey) }}>
+            <span className="text-[22px] sm:text-[24px] font-bold tracking-normal leading-none truncate font-sans" style={{ color: getNameColor(match.playerRankKey) }}>
               {username}
             </span>
           </div>

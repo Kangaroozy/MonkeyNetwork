@@ -42,7 +42,7 @@ export default function PlayerStatsModal() {
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-[#8A8A95]">Player Overview</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-mn-fog">Player Overview</p>
             <div className="mt-1 flex items-start gap-2 min-w-0">
               {data && getRankIconPath(data.rankKey) && (
                 <img
@@ -53,8 +53,8 @@ export default function PlayerStatsModal() {
                 />
               )}
               <h3
-                className="text-xl sm:text-3xl font-extrabold break-all whitespace-normal leading-tight"
-                style={{ color: data ? getNameColor(data.rankKey) : "#F0F0F2" }}
+                className="text-xl sm:text-3xl font-bold tracking-normal break-all whitespace-normal leading-tight font-sans"
+                style={{ color: data ? getNameColor(data.rankKey) : "#E8EDE5" }}
               >
                 {data?.username ?? username}
               </h3>
@@ -62,7 +62,7 @@ export default function PlayerStatsModal() {
           </div>
           <button
             onClick={() => setUsername(null)}
-            className="rounded-xl p-2 text-[#8A8A95] hover:text-[#F0F0F2] hover:bg-white/5 transition"
+            className="rounded-xl p-2 text-mn-fog hover:text-mn-mist hover:bg-white/5 transition"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -88,7 +88,7 @@ export default function PlayerStatsModal() {
                 </span>
               </div>
               <div className="mt-3 w-full">
-                <div className="flex items-center justify-between text-[11px] text-[#8A8A95] mb-1">
+                <div className="flex items-center justify-between text-[11px] text-mn-fog mb-1">
                   <span>EXP</span>
                   <span>{data.expCurrent.toLocaleString()} / {data.expRequired.toLocaleString()}</span>
                 </div>
@@ -123,8 +123,8 @@ export default function PlayerStatsModal() {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-black/20 px-3 sm:px-4 py-2.5 sm:py-3">
-      <p className="text-[11px] uppercase tracking-[0.08em] text-[#8A8A95]">{label}</p>
-      <p className="text-[16px] sm:text-lg font-bold text-[#F0F0F2] mt-1">{value}</p>
+      <p className="text-[11px] uppercase tracking-[0.08em] text-mn-fog">{label}</p>
+      <p className="text-[16px] sm:text-lg font-bold text-mn-mist mt-1">{value}</p>
     </div>
   );
 }

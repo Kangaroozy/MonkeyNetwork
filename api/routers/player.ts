@@ -375,6 +375,7 @@ export const playerRouter = createRouter({
           pms.kit_key AS kitKey,
           COUNT(*) AS uses,
           COALESCE(SUM(pms.wins), 0) AS wins,
+          COALESCE(SUM(pms.losses), 0) AS losses,
           COALESCE(SUM(pms.kills), 0) AS kills
         FROM player_match_stats pms
         WHERE LOWER(HEX(pms.player_uuid)) = ${target.id}
@@ -386,12 +387,14 @@ export const playerRouter = createRouter({
         kitKey: string;
         uses: number;
         wins: number;
+        losses: number;
         kills: number;
       }>(classRaw).map((row) => ({
         kitKey: row.kitKey,
         className: prettifyLabel(row.kitKey),
         uses: Number(row.uses ?? 0),
         wins: Number(row.wins ?? 0),
+        losses: Number(row.losses ?? 0),
         kills: Number(row.kills ?? 0),
       }));
 

@@ -28,18 +28,19 @@ export default function MatchHistoryFilters({
   onDateWindowChange,
 }: Props) {
   return (
-    <div className="relative bg-[#111114] border border-[rgba(255,255,255,0.08)] rounded-2xl p-4 mb-6 overflow-hidden">
-      <div className="absolute -top-20 right-0 w-48 h-48 bg-[#D4A843]/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative bg-mn-moss border border-white/[0.08] rounded-2xl p-4 mb-6 overflow-hidden">
+      <div className="absolute -top-20 right-0 w-48 h-48 bg-mn-lime/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-16 left-0 w-40 h-40 bg-mn-teal/10 rounded-full blur-3xl pointer-events-none" />
       <div className="relative">
-        <p className="text-[11px] uppercase tracking-[0.12em] text-[#5A5A65] mb-2">Mode</p>
+        <p className="text-[11px] uppercase tracking-[0.12em] text-mn-dim mb-2">Mode</p>
         <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => onModeChange("")}
             className="px-3 py-2 rounded-lg text-[13px] border transition-colors"
             style={{
-              color: mode === "" ? "#F0F0F2" : "#8A8A95",
-              borderColor: mode === "" ? "rgba(212,168,67,0.7)" : "rgba(255,255,255,0.08)",
-              backgroundColor: mode === "" ? "rgba(212,168,67,0.12)" : "transparent",
+              color: mode === "" ? "#E8EDE5" : "#9BA39A",
+              borderColor: mode === "" ? "rgba(196,255,77,0.55)" : "rgba(255,255,255,0.08)",
+              backgroundColor: mode === "" ? "rgba(196,255,77,0.1)" : "transparent",
             }}
           >
             All BR Modes
@@ -50,9 +51,9 @@ export default function MatchHistoryFilters({
               onClick={() => onModeChange(entry.slug)}
               className="px-3 py-2 rounded-lg text-[13px] border transition-colors"
               style={{
-                color: mode === entry.slug ? "#F0F0F2" : "#8A8A95",
-                borderColor: mode === entry.slug ? "rgba(212,168,67,0.7)" : "rgba(255,255,255,0.08)",
-                backgroundColor: mode === entry.slug ? "rgba(212,168,67,0.12)" : "transparent",
+                color: mode === entry.slug ? "#E8EDE5" : "#9BA39A",
+                borderColor: mode === entry.slug ? "rgba(196,255,77,0.55)" : "rgba(255,255,255,0.08)",
+                backgroundColor: mode === entry.slug ? "rgba(196,255,77,0.1)" : "transparent",
               }}
             >
               {entry.name}
@@ -62,7 +63,7 @@ export default function MatchHistoryFilters({
       </div>
 
       <div>
-        <p className="text-[11px] uppercase tracking-[0.12em] text-[#5A5A65] mb-2">Time Range</p>
+        <p className="text-[11px] uppercase tracking-[0.12em] text-mn-dim mb-2">Time Range</p>
         <div className="flex flex-wrap gap-2">
           {DATE_WINDOW_OPTIONS.map((option) => (
             <button
@@ -70,9 +71,9 @@ export default function MatchHistoryFilters({
               onClick={() => onDateWindowChange(option.value)}
               className="px-3 py-2 rounded-lg text-[13px] border transition-colors"
               style={{
-                color: dateWindow === option.value ? "#F0F0F2" : "#8A8A95",
-                borderColor: dateWindow === option.value ? "rgba(155,89,182,0.8)" : "rgba(255,255,255,0.08)",
-                backgroundColor: dateWindow === option.value ? "rgba(155,89,182,0.15)" : "transparent",
+                color: dateWindow === option.value ? "#E8EDE5" : "#9BA39A",
+                borderColor: dateWindow === option.value ? "rgba(46,196,182,0.65)" : "rgba(255,255,255,0.08)",
+                backgroundColor: dateWindow === option.value ? "rgba(46,196,182,0.12)" : "transparent",
               }}
             >
               {option.label}

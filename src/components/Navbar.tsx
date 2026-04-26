@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, type KeyboardEventHandler } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Search, Menu, X, Crown } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
+import DiscordIcon from "@/components/DiscordIcon";
+import BrandMark from "@/components/BrandMark";
 
 type SearchPlayer = {
   id: string;
@@ -101,22 +103,28 @@ export default function Navbar() {
     { label: "Leaderboards", href: "/" },
     { label: "Match History", href: "/matches" },
   ];
+  const discordUrl = "https://discord.gg/MDD34Zwk88";
 
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300"
       style={{
-        backgroundColor: scrolled ? "rgba(10, 10, 11, 0.85)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid transparent",
+        backgroundColor: scrolled ? "rgba(5, 8, 6, 0.88)" : "transparent",
+        backdropFilter: scrolled ? "blur(14px)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(196, 255, 77, 0.08)" : "1px solid transparent",
         transform: visible ? "translateY(0)" : "translateY(-64px)",
       }}
     >
       <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <Crown className="w-5 h-5 text-[#D4A843]" />
-          <span className="text-[18px] font-extrabold tracking-[0.08em] text-[#F0F0F2]">
-            MonkeyNetwork
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 shrink-0 group rounded-lg pr-1 -ml-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mn-lime/80"
+        >
+          <span className="text-mn-lime transition-transform duration-300 group-hover:scale-[1.04]">
+            <BrandMark variant="icon" />
+          </span>
+          <span className="font-display text-[17px] font-bold tracking-[-0.04em] text-mn-mist">
+            Monkey<span className="text-mn-lime">Network</span>
           </span>
         </Link>
 
@@ -127,21 +135,31 @@ export default function Navbar() {
               to={link.href}
               className="text-[14px] font-medium transition-colors duration-200 relative py-1"
               style={{
-                color: location.pathname === link.href ? "#F0F0F2" : "#8A8A95",
+                color: location.pathname === link.href ? "#E8EDE5" : "#9BA39A",
               }}
             >
               {link.label}
               {location.pathname === link.href && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#D4A843] rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-mn-lime rounded-full shadow-[0_0_12px_rgba(196,255,77,0.45)]" />
               )}
             </Link>
           ))}
+          <a
+            href={discordUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/12 bg-white/[0.04] text-mn-fog transition-colors hover:text-mn-mist hover:bg-[rgba(88,101,242,0.2)] hover:border-[rgba(88,101,242,0.5)]"
+            aria-label="Join Discord"
+            title="Join Discord"
+          >
+            <DiscordIcon className="h-4 w-4" />
+          </a>
         </div>
 
         <div className="flex items-center gap-3" ref={searchRootRef}>
           <div className="relative hidden sm:block w-[280px] lg:w-[320px]">
-            <div className="flex items-center bg-[#1A1A1F] border border-[rgba(255,255,255,0.06)] rounded-lg px-3 py-2 w-full focus-within:border-[#D4A843] transition-colors">
-              <Search className="w-4 h-4 text-[#5A5A65] shrink-0 mr-2" />
+            <div className="flex items-center bg-mn-leaf/90 border border-white/[0.08] rounded-lg px-3 py-2 w-full focus-within:border-mn-lime/50 focus-within:shadow-[0_0_0_1px_rgba(196,255,77,0.12)] transition-all">
+              <Search className="w-4 h-4 text-mn-dim shrink-0 mr-2" />
               <input
                 type="text"
                 placeholder="Search players..."
@@ -152,15 +170,15 @@ export default function Navbar() {
                 }}
                 onFocus={() => setSearchFocused(true)}
                 onKeyDown={handleSearchKeyDown}
-                className="bg-transparent text-[13px] text-[#F0F0F2] placeholder-[#5A5A65] outline-none w-full"
+                className="bg-transparent text-[13px] text-mn-mist placeholder-mn-dim outline-none w-full"
               />
             </div>
             {suggestionsVisible && (
-              <div className="absolute top-full mt-2 left-0 right-0 bg-[#1A1A1F] border border-[rgba(255,255,255,0.06)] rounded-xl overflow-hidden shadow-2xl transition-all duration-150">
+              <div className="absolute top-full mt-2 left-0 right-0 bg-mn-leaf border border-white/[0.08] rounded-xl overflow-hidden shadow-2xl shadow-black/40 transition-all duration-150">
                 {isSearching ? (
-                  <div className="px-4 py-3 text-[12px] text-[#8A8A95]">Searching players...</div>
+                  <div className="px-4 py-3 text-[12px] text-mn-fog">Searching players...</div>
                 ) : suggestionList.length === 0 ? (
-                  <div className="px-4 py-3 text-[12px] text-[#8A8A95]">No players found for "{debouncedQuery}".</div>
+                  <div className="px-4 py-3 text-[12px] text-mn-fog">No players found for "{debouncedQuery}".</div>
                 ) : (
                   suggestionList.map((player, index) => (
                     <button
@@ -193,7 +211,7 @@ export default function Navbar() {
                           )}
                           <span className="whitespace-normal break-all">{player.username}</span>
                         </p>
-                        <p className="text-[11px] text-[#8A8A95]">Press Enter or click to open profile</p>
+                        <p className="text-[11px] text-mn-fog">Press Enter or click to open profile</p>
                       </div>
                     </button>
                   ))
@@ -204,14 +222,14 @@ export default function Navbar() {
 
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className="sm:hidden p-2 text-[#8A8A95] hover:text-[#F0F0F2] transition-colors"
+            className="sm:hidden p-2 text-mn-fog hover:text-mn-mist transition-colors"
           >
             <Search className="w-5 h-5" />
           </button>
 
           <button
             onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="md:hidden p-2 text-[#8A8A95] hover:text-[#F0F0F2] transition-colors"
+            className="md:hidden p-2 text-mn-fog hover:text-mn-mist transition-colors"
           >
             {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -219,9 +237,9 @@ export default function Navbar() {
       </div>
 
       {showSearch && (
-        <div className="absolute top-16 left-0 right-0 bg-[#1A1A1F] border-b border-[rgba(255,255,255,0.06)] p-4 sm:hidden">
-          <div className="flex items-center bg-[#111114] border border-[rgba(255,255,255,0.06)] rounded-lg px-3 py-2">
-            <Search className="w-4 h-4 text-[#5A5A65] shrink-0 mr-2" />
+        <div className="absolute top-16 left-0 right-0 bg-mn-leaf/95 backdrop-blur-xl border-b border-white/[0.07] p-4 sm:hidden">
+          <div className="flex items-center bg-mn-moss border border-white/[0.08] rounded-lg px-3 py-2">
+            <Search className="w-4 h-4 text-mn-dim shrink-0 mr-2" />
             <input
               type="text"
               placeholder="Search players..."
@@ -231,22 +249,22 @@ export default function Navbar() {
                 setActiveSuggestionIndex(-1);
               }}
               onFocus={() => setSearchFocused(true)}
-              className="bg-transparent text-[13px] text-[#F0F0F2] placeholder-[#5A5A65] outline-none w-full"
+              className="bg-transparent text-[13px] text-mn-mist placeholder-mn-dim outline-none w-full"
               autoFocus
             />
           </div>
           {suggestionsVisible && (
             <div className="mt-2 max-h-[300px] overflow-y-auto">
               {isSearching ? (
-                <div className="px-3 py-2.5 text-[12px] text-[#8A8A95]">Searching players...</div>
+                <div className="px-3 py-2.5 text-[12px] text-mn-fog">Searching players...</div>
               ) : suggestionList.length === 0 ? (
-                <div className="px-3 py-2.5 text-[12px] text-[#8A8A95]">No players found for "{debouncedQuery}".</div>
+                <div className="px-3 py-2.5 text-[12px] text-mn-fog">No players found for "{debouncedQuery}".</div>
               ) : (
                 suggestionList.map((player) => (
                   <button
                     key={player.id}
                     onClick={() => handleSearchPick(player as SearchPlayer)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#222228] transition-colors text-left rounded-lg"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-mn-leaf transition-colors text-left rounded-lg"
                   >
                     <img
                       src={player.avatarUrl || `https://mc-heads.net/avatar/${player.username}`}
@@ -275,17 +293,27 @@ export default function Navbar() {
       )}
 
       {showMobileMenu && (
-        <div className="absolute top-16 left-0 right-0 bg-[rgba(10,10,11,0.95)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] p-4 md:hidden">
+        <div className="absolute top-16 left-0 right-0 bg-mn-void/95 backdrop-blur-xl border-b border-white/[0.07] p-4 md:hidden">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               to={link.href}
               onClick={() => setShowMobileMenu(false)}
-              className="block py-3 text-[14px] font-medium text-[#8A8A95] hover:text-[#F0F0F2] transition-colors"
+              className="block py-3 text-[14px] font-medium text-mn-fog hover:text-mn-mist transition-colors"
             >
               {link.label}
             </Link>
           ))}
+          <a
+            href={discordUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => setShowMobileMenu(false)}
+            className="mt-1 flex items-center gap-2 py-3 text-[14px] font-medium text-mn-fog hover:text-mn-mist transition-colors"
+          >
+            <DiscordIcon className="h-4 w-4" />
+            Discord
+          </a>
         </div>
       )}
     </nav>
