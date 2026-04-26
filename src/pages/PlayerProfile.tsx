@@ -417,7 +417,6 @@ export default function PlayerProfile() {
                       icon={Crosshair}
                       label="Total kills"
                       value={formatNumber(player.totalKills)}
-                      detail={`Peak in one match: ${formatNumber(player.maxKillsInMatch)}`}
                     />
                   </li>
                   <li>
@@ -433,7 +432,6 @@ export default function PlayerProfile() {
                       icon={Sparkles}
                       label="Legendaries crafted"
                       value={formatNumber(player.totalLegendariesCrafted)}
-                      detail="Special items you finished at a crafting table in real matches — one count each time you complete a legendary recipe."
                     />
                   </li>
                 </ul>
