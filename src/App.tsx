@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import PlayerStatsModal from "@/components/PlayerStatsModal";
 import Home from "@/pages/Home";
 import PlayerProfile from "@/pages/PlayerProfile";
+import MatchHistory from "@/pages/MatchHistory";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/matches" element={<MatchHistory />} />
           <Route path="/player/:username" element={<PlayerProfile />} />
         </Routes>
       </main>

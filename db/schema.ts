@@ -8,6 +8,8 @@ import {
   timestamp,
   bigint,
   mysqlEnum,
+  text,
+  tinyint,
 } from "drizzle-orm/mysql-core";
 
 export const players = mysqlTable("players", {
@@ -118,4 +120,37 @@ export const playerStatsModeKit = mysqlTable("player_stats_mode_kit", {
   assists: int("assists").notNull().default(0),
   matchesPlayed: int("matches_played").notNull().default(0),
   updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const uhcMatch = mysqlTable("uhc_match", {
+  matchId: binary("match_id", { length: 16 }).primaryKey(),
+  hostUuid: binary("host_uuid", { length: 16 }).notNull(),
+  state: varchar("state", { length: 16 }).notNull(),
+  configJson: text("config_json").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  gameStartedAt: timestamp("game_started_at"),
+  endedAt: timestamp("ended_at"),
+});
+
+export const matchRoster = mysqlTable("match_roster", {
+  matchId: binary("match_id", { length: 16 }).notNull(),
+  playerUuid: binary("player_uuid", { length: 16 }).notNull(),
+  role: varchar("role", { length: 16 }).notNull(),
+  readyFlag: tinyint("ready_flag").notNull().default(0),
+  joinedAt: timestamp("joined_at").notNull(),
+  connectionStatus: varchar("connection_status", { length: 16 }).notNull(),
+});
+
+export const playerMatchStats = mysqlTable("player_match_stats", {
+  matchId: binary("match_id", { length: 16 }).notNull(),
+  playerUuid: binary("player_uuid", { length: 16 }).notNull(),
+  gamemodeKey: varchar("gamemode_key", { length: 64 }).notNull(),
+  kitKey: varchar("kit_key", { length: 32 }).notNull(),
+  wins: int("wins").notNull().default(0),
+  losses: int("losses").notNull().default(0),
+  kills: int("kills").notNull().default(0),
+  deaths: int("deaths").notNull().default(0),
+  assists: int("assists").notNull().default(0),
+  matchesPlayed: int("matches_played").notNull().default(1),
+  recordedAt: timestamp("recorded_at").notNull(),
 });

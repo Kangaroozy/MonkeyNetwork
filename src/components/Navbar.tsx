@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, type KeyboardEventHandler } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Search, Menu, X, Crown } from "lucide-react";
 import { trpc } from "@/providers/trpc";
-import { openPlayerModal } from "@/lib/playerModal";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
 
 type SearchPlayer = {
@@ -25,6 +24,7 @@ export default function Navbar() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const searchRootRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -69,7 +69,7 @@ export default function Navbar() {
     setShowSearch(false);
     setSearchFocused(false);
     setActiveSuggestionIndex(-1);
-    openPlayerModal(player.username);
+    navigate(`/player/${encodeURIComponent(player.username)}`);
   };
 
   const handleSearchKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -99,6 +99,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Leaderboards", href: "/" },
+    { label: "Match History", href: "/matches" },
   ];
 
   return (
@@ -192,7 +193,7 @@ export default function Navbar() {
                           )}
                           <span className="whitespace-normal break-all">{player.username}</span>
                         </p>
-                        <p className="text-[11px] text-[#8A8A95]">Press Enter or click to preview</p>
+                        <p className="text-[11px] text-[#8A8A95]">Press Enter or click to open profile</p>
                       </div>
                     </button>
                   ))

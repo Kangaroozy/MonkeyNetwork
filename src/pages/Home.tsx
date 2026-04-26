@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { Crown, ChevronDown, ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { formatNumber, formatWinRate, modeColor, modeLabel } from "@/lib/tiers";
-import { openPlayerModal } from "@/lib/playerModal";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
 import gsap from "gsap";
 
@@ -134,6 +134,7 @@ function HeroSection() {
 }
 
 function LeaderboardSection() {
+  const navigate = useNavigate();
   const [activeMode, setActiveMode] = useState("overall");
   const [classScope, setClassScope] = useState<"all" | "kit">("all");
   const [kitKey, setKitKey] = useState<string>("");
@@ -296,7 +297,7 @@ function LeaderboardSection() {
             return (
               <button
                 key={player.playerId}
-                onClick={() => openPlayerModal(player.username)}
+                onClick={() => navigate(`/player/${encodeURIComponent(player.username)}`)}
                 className="group relative w-full overflow-hidden rounded-xl sm:rounded-2xl border bg-[#111114]/90 text-left transition-all duration-200 md:hover:-translate-x-3 md:hover:scale-[1.01] hover:bg-[#18181d] active:scale-[0.99]"
                 style={{ borderColor: palette.border, boxShadow: palette.glow }}
               >
