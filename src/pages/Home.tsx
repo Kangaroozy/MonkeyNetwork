@@ -104,7 +104,7 @@ function HeroSection() {
         </h1>
 
         <p className="hero-intro text-[15px] sm:text-lg text-mn-fog font-medium max-w-md leading-relaxed mb-8 sm:mb-10">
-          Competitive Minecraft UHC rankings — sharp stats, real matches, zero filler.
+          Competitive Minecraft UHC rankings for Asia — live leaderboards and real match history.
         </p>
 
         <div className="hero-intro flex flex-wrap items-center justify-center gap-3">
