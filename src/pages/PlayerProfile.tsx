@@ -15,6 +15,7 @@ import {
   HeartPulse,
   Pickaxe,
   Skull,
+  Sparkles,
   Sword,
   Swords,
   Target,
@@ -425,6 +426,14 @@ export default function PlayerProfile() {
                       label="Matches played"
                       value={formatNumber(player.matchesPlayed)}
                       detail="All-time on MonkeyNetwork"
+                    />
+                  </li>
+                  <li>
+                    <PerformanceStatRow
+                      icon={Sparkles}
+                      label="Legendaries crafted"
+                      value={formatNumber(player.totalLegendariesCrafted)}
+                      detail="Special items you finished at a crafting table in real matches — one count each time you complete a legendary recipe."
                     />
                   </li>
                 </ul>

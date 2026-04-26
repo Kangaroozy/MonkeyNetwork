@@ -270,9 +270,11 @@ export const playerRouter = createRouter({
           COALESCE(profile.br_perk_speed, 1) AS perkSpeed,
           COALESCE(profile.br_perk_golden_bounty, 1) AS perkGoldenBounty,
           COALESCE(profile.br_perk_saturation, 1) AS perkSaturation,
-          profile.updated_at AS profileUpdatedAt
+          profile.updated_at AS profileUpdatedAt,
+          COALESCE(global_stats.legendary_crafts, 0) AS legendaryCrafts
         FROM player_web_profile web_profile
         LEFT JOIN player_profile profile ON profile.unique_id = web_profile.unique_id
+        LEFT JOIN player_global_stats global_stats ON global_stats.unique_id = web_profile.unique_id
         WHERE LOWER(web_profile.player_name) = LOWER(${input.username})
         ORDER BY web_profile.updated_at DESC
         LIMIT 1
@@ -297,6 +299,7 @@ export const playerRouter = createRouter({
         perkGoldenBounty: number | null;
         perkSaturation: number | null;
         profileUpdatedAt: Date | string | null;
+        legendaryCrafts: number | null;
       }>(targetRaw);
       if (!target) return null;
 
@@ -417,6 +420,7 @@ export const playerRouter = createRouter({
       const luckPermsGroups = await resolveLuckPermsPrimaryGroups([target.id]);
       const fallbackRank = (target.rankKey ?? "default").toLowerCase();
       const mostUsedClass = classUsage[0]?.className ?? "Unknown";
+      const totalLegendariesCrafted = Math.max(0, Number(target.legendaryCrafts ?? 0));
       const joinDate = agg?.firstMatchAt ?? target.profileUpdatedAt ?? new Date();
       const lastSeenAt = agg?.lastMatchAt ?? target.profileUpdatedAt ?? null;
       const classUpgradeLevels = [
@@ -465,6 +469,7 @@ export const playerRouter = createRouter({
         maxKillsInMatch,
         avgDamagePerMatch,
         mostUsedClass,
+        totalLegendariesCrafted,
         classUsage,
         classUpgradeLevels,
         perkLevels,
