@@ -1,5 +1,6 @@
 import DiscordIcon from "@/components/DiscordIcon";
 import BrandMark from "@/components/BrandMark";
+import ServerIpPill from "@/components/ServerIpPill";
 
 export default function Footer() {
   const discordUrl = "https://discord.gg/MDD34Zwk88";
@@ -33,6 +34,9 @@ export default function Footer() {
         <p className="text-[12px] text-mn-dim max-w-xl leading-relaxed">
           MonkeyNetwork 2026. Not affiliated with Mojang Studios or Microsoft.
         </p>
+        <div className="mt-4">
+          <ServerIpPill />
+        </div>
       </div>
     </footer>
   );

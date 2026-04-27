@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { Crown, ChevronDown, ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
+import { Crown, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { formatNumber, formatWinRate, modeColor, modeLabel } from "@/lib/tiers";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
+import ServerIpPill from "@/components/ServerIpPill";
 import gsap from "gsap";
 
 type LeaderboardEntry = {
@@ -52,7 +53,11 @@ function placementPalette(rank: number) {
   };
 }
 
-function HeroSection() {
+type HeroSectionProps = {
+  onLeaderboardClick: () => void;
+};
+
+function HeroSection({ onLeaderboardClick }: HeroSectionProps) {
   const heroRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
 
@@ -108,17 +113,16 @@ function HeroSection() {
         </p>
 
         <div className="hero-intro flex flex-wrap items-center justify-center gap-3">
-          {[{ icon: Gamepad2, label: "UHC focus" }].map((stat) => (
-            <div
-              key={stat.label}
-              className="flex items-center gap-2.5 rounded-lg border border-mn-lime/20 bg-mn-leaf/50 pl-3 pr-4 py-2 backdrop-blur-sm"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-mn-lime/15 text-mn-lime">
-                <stat.icon className="w-3.5 h-3.5" />
-              </span>
-              <span className="text-[13px] font-semibold tracking-normal text-mn-mist font-mono uppercase">{stat.label}</span>
-            </div>
-          ))}
+          <button
+            type="button"
+            onClick={onLeaderboardClick}
+            className="flex items-center gap-2.5 rounded-lg border border-mn-lime/25 bg-mn-leaf/50 pl-3 pr-4 py-2 text-[13px] font-semibold tracking-normal text-mn-mist font-mono uppercase transition-colors hover:border-mn-lime/45 hover:bg-mn-leaf/80"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-mn-lime/15 text-mn-lime">
+              <ChevronDown className="w-3.5 h-3.5" />
+            </span>
+            Leaderboard
+          </button>
         </div>
       </div>
 
@@ -137,7 +141,7 @@ function LeaderboardSection() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<
     "username" | "wins" | "winRate" | "kda" | "deaths" | "killAverage" | "totalKills" | "matchesPlayed"
-  >("kda");
+  >("wins");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data: filterData } = trpc.leaderboard.filters.useQuery({
@@ -183,7 +187,7 @@ function LeaderboardSection() {
   };
 
   return (
-    <section className="max-w-[1280px] mx-auto px-3 sm:px-6 py-8 sm:py-12">
+    <section id="leaderboard" className="max-w-[1280px] mx-auto px-3 sm:px-6 py-8 sm:py-12 scroll-mt-24">
       <div className="mb-8 flex gap-4 sm:gap-5">
         <div
           className="w-1 shrink-0 rounded-full bg-gradient-to-b from-mn-lime via-mn-teal/80 to-transparent shadow-[0_0_20px_rgba(196,255,77,0.25)]"
@@ -198,6 +202,9 @@ function LeaderboardSection() {
             {activeMode !== "overall" ? ` in ${modeLabel(activeMode)}` : " across all game modes"}
             {classScope === "kit" && kitKey ? ` (${modeLabel(kitKey)})` : " (all kits)"}.
           </p>
+          <div className="mt-3">
+            <ServerIpPill />
+          </div>
         </div>
       </div>
 
@@ -428,9 +435,13 @@ function LeaderboardSection() {
 }
 
 export default function Home() {
+  const handleLeaderboardScroll = () => {
+    document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div>
-      <HeroSection />
+      <HeroSection onLeaderboardClick={handleLeaderboardScroll} />
       <LeaderboardSection />
     </div>
   );

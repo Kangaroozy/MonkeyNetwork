@@ -5,6 +5,7 @@ import { trpc } from "@/providers/trpc";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
 import DiscordIcon from "@/components/DiscordIcon";
 import BrandMark from "@/components/BrandMark";
+import ServerIpPill from "@/components/ServerIpPill";
 
 type SearchPlayer = {
   id: string;
@@ -144,19 +145,12 @@ export default function Navbar() {
               )}
             </Link>
           ))}
-          <a
-            href={discordUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/12 bg-white/[0.04] text-mn-fog transition-colors hover:text-mn-mist hover:bg-[rgba(88,101,242,0.2)] hover:border-[rgba(88,101,242,0.5)]"
-            aria-label="Join Discord"
-            title="Join Discord"
-          >
-            <DiscordIcon className="h-4 w-4" />
-          </a>
         </div>
 
         <div className="flex items-center gap-3" ref={searchRootRef}>
+          <div className="hidden lg:block">
+            <ServerIpPill compact showLabel={false} />
+          </div>
           <div className="relative hidden sm:block w-[280px] lg:w-[320px]">
             <div className="flex items-center bg-mn-leaf/90 border border-white/[0.08] rounded-lg px-3 py-2 w-full focus-within:border-mn-lime/50 focus-within:shadow-[0_0_0_1px_rgba(196,255,77,0.12)] transition-all">
               <Search className="w-4 h-4 text-mn-dim shrink-0 mr-2" />
@@ -219,6 +213,16 @@ export default function Navbar() {
               </div>
             )}
           </div>
+          <a
+            href={discordUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden md:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/12 bg-white/[0.04] text-mn-fog transition-colors hover:text-mn-mist hover:bg-[rgba(88,101,242,0.2)] hover:border-[rgba(88,101,242,0.5)]"
+            aria-label="Join Discord"
+            title="Join Discord"
+          >
+            <DiscordIcon className="h-4 w-4" />
+          </a>
 
           <button
             onClick={() => setShowSearch(!showSearch)}
