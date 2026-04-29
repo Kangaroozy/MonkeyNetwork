@@ -165,10 +165,32 @@ export const playerRouter = createRouter({
       const db = getDb();
       const raw = await db.execute(sql`
         WITH target AS (
-          SELECT unique_id, player_name, skin_url
-          FROM player_web_profile
-          WHERE LOWER(player_name) = LOWER(${input.username})
-          ORDER BY updated_at DESC
+          SELECT
+            web_profile.unique_id,
+            web_profile.player_name,
+            web_profile.skin_url
+          FROM player_web_profile web_profile
+          LEFT JOIN player_profile profile ON profile.unique_id = web_profile.unique_id
+          WHERE LOWER(web_profile.player_name) = LOWER(${input.username})
+          ORDER BY
+            (
+              COALESCE(profile.class_miner_level, 1) +
+              COALESCE(profile.class_warrior_level, 1) +
+              COALESCE(profile.class_archer_level, 1) +
+              COALESCE(profile.class_looter_level, 1) +
+              COALESCE(profile.class_trapper_level, 1) +
+              COALESCE(profile.class_fisherman_level, 1) +
+              COALESCE(profile.br_perk_haste, 1) +
+              COALESCE(profile.br_perk_experience_boost, 1) +
+              COALESCE(profile.br_perk_starter_health, 1) +
+              COALESCE(profile.br_perk_speed, 1) +
+              COALESCE(profile.br_perk_golden_bounty, 1) +
+              COALESCE(profile.br_perk_saturation, 1)
+            ) DESC,
+            COALESCE(profile.level, 1) DESC,
+            COALESCE(profile.exp, 0) DESC,
+            COALESCE(profile.updated_at, web_profile.updated_at) DESC,
+            web_profile.updated_at DESC
           LIMIT 1
         ),
         agg AS (
@@ -276,7 +298,25 @@ export const playerRouter = createRouter({
         LEFT JOIN player_profile profile ON profile.unique_id = web_profile.unique_id
         LEFT JOIN player_global_stats global_stats ON global_stats.unique_id = web_profile.unique_id
         WHERE LOWER(web_profile.player_name) = LOWER(${input.username})
-        ORDER BY web_profile.updated_at DESC
+        ORDER BY
+          (
+            COALESCE(profile.class_miner_level, 1) +
+            COALESCE(profile.class_warrior_level, 1) +
+            COALESCE(profile.class_archer_level, 1) +
+            COALESCE(profile.class_looter_level, 1) +
+            COALESCE(profile.class_trapper_level, 1) +
+            COALESCE(profile.class_fisherman_level, 1) +
+            COALESCE(profile.br_perk_haste, 1) +
+            COALESCE(profile.br_perk_experience_boost, 1) +
+            COALESCE(profile.br_perk_starter_health, 1) +
+            COALESCE(profile.br_perk_speed, 1) +
+            COALESCE(profile.br_perk_golden_bounty, 1) +
+            COALESCE(profile.br_perk_saturation, 1)
+          ) DESC,
+          COALESCE(profile.level, 1) DESC,
+          COALESCE(profile.exp, 0) DESC,
+          COALESCE(profile.updated_at, web_profile.updated_at) DESC,
+          web_profile.updated_at DESC
         LIMIT 1
       `);
       const [target] = extractRows<{
