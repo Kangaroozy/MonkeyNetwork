@@ -71,6 +71,8 @@ export interface MatchListItem {
   opponentName: string;
   modeSlug: string;
   modeName: string;
+  modeKey: "solo" | "duo" | "trio" | "quads" | "civ" | "unknown";
+  isCustomGame: boolean;
   result: MatchResult;
   playerScore: number;
   opponentScore: number;
@@ -91,6 +93,7 @@ export interface MatchListItem {
   finalKillBy: string | null;
   finalDeathBy: string | null;
   timelineEvents: string[];
+  winningTeamPlayers: string[];
   winnerInventoryItems: string[];
   winnerInventory: WinnerInventorySnapshot | null;
 }

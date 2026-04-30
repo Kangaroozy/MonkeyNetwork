@@ -2,7 +2,7 @@ import type { MatchListItem } from "@contracts/match-history";
 import WinnerInventoryDialog from "./WinnerInventoryDialog";
 
 function renderNullable(value: string | number | null): string {
-  if (value === null || value === "") return "Coming soon";
+  if (value === null || value === "") return "N/A";
   return String(value);
 }
 
@@ -19,7 +19,7 @@ function toTitleCase(input: string): string {
 
 function renderPrettyText(value: string | number | null): string {
   const rendered = renderNullable(value);
-  if (rendered === "Coming soon") return rendered;
+  if (rendered === "N/A") return rendered;
   if (typeof value === "number") return rendered;
   return toTitleCase(rendered.replace(/_/g, " "));
 }
@@ -70,7 +70,7 @@ function timelineEventClasses(description: string): { dot: string; chip: string 
 }
 
 function formatDuration(totalSeconds: number | null): string {
-  if (totalSeconds === null) return "Coming soon";
+  if (totalSeconds === null) return "N/A";
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
@@ -81,6 +81,11 @@ type Props = {
 };
 
 export default function MatchHistoryExpanded({ match }: Props) {
+  const canShowWinnerInventory = (match.teamSize ?? 1) <= 1;
+  const hasGearProgression =
+    Boolean(match.bestWeapon && match.bestWeapon.trim().length > 0) ||
+    Boolean(match.highestArmorTier && match.highestArmorTier.trim().length > 0) ||
+    (match.totalHealingUsed ?? 0) > 0;
   return (
     <div className="mt-3 border-t border-[rgba(255,255,255,0.06)] pt-3">
       <p className="text-[11px] uppercase tracking-[0.12em] text-[#6A6A74] mb-3">Battle Breakdown</p>
@@ -130,26 +135,32 @@ export default function MatchHistoryExpanded({ match }: Props) {
             </div>
           ) : (
             <ul className="space-y-1.5 text-[13px] text-[#A0A0AD]">
-              <li>No timeline events were captured for this match.</li>
+              <li>No combat timeline data available for this match.</li>
             </ul>
           )}
         </div>
         <div className="bg-[#0F0F13] border border-[rgba(255,255,255,0.05)] rounded-lg p-3">
           <p className="text-[12px] uppercase tracking-[0.08em] text-[#8A8A95] mb-2">Gear Progression</p>
-          <ul className="space-y-1.5 text-[13px] text-[#A0A0AD]">
-            <li>Best Weapon: {renderPrettyText(match.bestWeapon)}</li>
-            <li>Highest Armor Tier: {renderPrettyText(match.highestArmorTier)}</li>
-            <li>Total Healing Used: {renderNullable(match.totalHealingUsed)}</li>
-          </ul>
+          {hasGearProgression ? (
+            <ul className="space-y-1.5 text-[13px] text-[#A0A0AD]">
+              <li>Best Weapon: {renderPrettyText(match.bestWeapon)}</li>
+              <li>Highest Armor Tier: {renderPrettyText(match.highestArmorTier)}</li>
+              <li>Total Healing Used: {renderNullable(match.totalHealingUsed)}</li>
+            </ul>
+          ) : (
+            <p className="text-[13px] text-[#A0A0AD]">No gear progression data available for this match.</p>
+          )}
         </div>
       </div>
 
-      <div className="mt-3 bg-[#0F0F13] border border-[rgba(255,255,255,0.05)] rounded-lg p-3">
-        <WinnerInventoryDialog
-          inventory={match.winnerInventory}
-          winnerName={match.playerUsername ?? "Unknown Winner"}
-        />
-      </div>
+      {canShowWinnerInventory && (
+        <div className="mt-3 bg-[#0F0F13] border border-[rgba(255,255,255,0.05)] rounded-lg p-3">
+          <WinnerInventoryDialog
+            inventory={match.winnerInventory}
+            winnerName={match.winningTeamPlayers[0] ?? match.playerUsername ?? "Unknown Winner"}
+          />
+        </div>
+      )}
     </div>
   );
 }

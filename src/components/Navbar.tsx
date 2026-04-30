@@ -104,7 +104,7 @@ export default function Navbar() {
     { label: "Leaderboards", href: "/" },
     { label: "Match History", href: "/matches" },
   ];
-  const discordUrl = "https://discord.gg/MDD34Zwk88";
+  const discordUrl = "https://discord.gg/tkE6BzXA3Q";
 
   return (
     <nav

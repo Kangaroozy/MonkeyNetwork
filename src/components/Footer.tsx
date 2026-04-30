@@ -3,7 +3,7 @@ import BrandMark from "@/components/BrandMark";
 import ServerIpPill from "@/components/ServerIpPill";
 
 export default function Footer() {
-  const discordUrl = "https://discord.gg/MDD34Zwk88";
+  const discordUrl = "https://discord.gg/tkE6BzXA3Q";
   return (
     <footer className="relative border-t border-white/[0.07] bg-mn-canopy/80 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 mn-grid-overlay mn-grid-overlay--footer opacity-50" aria-hidden />

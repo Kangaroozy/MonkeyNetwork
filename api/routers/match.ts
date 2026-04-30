@@ -69,6 +69,24 @@ function prettifyModeLabel(modeSlug: string): string {
     .join(" ");
 }
 
+function normalizeModeKey(rawModeKey: string | null | undefined): MatchListItem["modeKey"] {
+  const normalized = (rawModeKey ?? "").trim().toLowerCase();
+  if (normalized === "solo") return "solo";
+  if (normalized === "duo") return "duo";
+  if (normalized === "trio") return "trio";
+  if (normalized === "quads" || normalized === "quad") return "quads";
+  if (normalized === "civ" || normalized === "civilization") return "civ";
+  return "unknown";
+}
+
+function parseWinningPlayersRaw(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split("||")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
 function materialToDisplay(material: string): string {
   return material.toLowerCase().replace(/_/g, " ");
 }
@@ -267,6 +285,11 @@ async function queryMatchList(input: {
               'Unknown'
             ) AS opponentName,
             pms.gamemode_key AS modeSlug,
+            COALESCE(
+              NULLIF(JSON_UNQUOTE(JSON_EXTRACT(m.config_json, '$.modeKey')), ''),
+              pms.gamemode_key
+            ) AS modeKey,
+            COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(m.config_json, '$.isCustomGame')) AS UNSIGNED), 0) AS isCustomGame,
             CASE WHEN pms.wins > 0 THEN 'WIN' WHEN pms.losses > 0 THEN 'LOSS' ELSE 'DRAW' END AS result,
             COALESCE(pms.kills, 0) AS playerScore,
             0 AS opponentScore,
@@ -292,6 +315,16 @@ async function queryMatchList(input: {
             COALESCE(pms.total_healing_used, 0) AS totalHealingUsed,
             NULLIF(pms.final_kill_by, '') AS finalKillBy,
             NULLIF(pms.final_death_by, '') AS finalDeathBy,
+            (
+              SELECT GROUP_CONCAT(
+                COALESCE(winner_profile.player_name, LEFT(LOWER(HEX(winner_stats.player_uuid)), 12))
+                ORDER BY COALESCE(winner_profile.player_name, LEFT(LOWER(HEX(winner_stats.player_uuid)), 12)) ASC
+                SEPARATOR '||'
+              )
+              FROM player_match_stats winner_stats
+              LEFT JOIN player_web_profile winner_profile ON winner_profile.unique_id = winner_stats.player_uuid
+              WHERE winner_stats.match_id = pms.match_id AND winner_stats.wins > 0
+            ) AS winningPlayersRaw,
             NULLIF(pms.winner_inventory_snapshot, '') AS winnerInventoryRaw,
             (
               SELECT GROUP_CONCAT(CONCAT(COALESCE(ev.event_second, 0), '::', REPLACE(ev.description, '||', '|')) ORDER BY ev.event_second SEPARATOR '||')
@@ -308,7 +341,7 @@ async function queryMatchList(input: {
         `)
       : await db.execute(sql`
           SELECT
-            LOWER(HEX(m.match_id)) AS id,
+            CONCAT(LOWER(HEX(m.match_id)), ':', LOWER(HEX(winner_stats.player_uuid))) AS id,
             LOWER(HEX(m.match_id)) AS matchPublicId,
             NULL AS playerId,
             COALESCE(winner_profile.player_name, LEFT(LOWER(HEX(winner_stats.player_uuid)), 12), 'Unknown') AS playerUsername,
@@ -319,6 +352,11 @@ async function queryMatchList(input: {
             NULL AS opponentId,
             'N/A' AS opponentName,
             winner_stats.gamemode_key AS modeSlug,
+            COALESCE(
+              NULLIF(JSON_UNQUOTE(JSON_EXTRACT(m.config_json, '$.modeKey')), ''),
+              winner_stats.gamemode_key
+            ) AS modeKey,
+            COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(m.config_json, '$.isCustomGame')) AS UNSIGNED), 0) AS isCustomGame,
             'WIN' AS result,
             COALESCE(winner_stats.kills, 0) AS playerScore,
             0 AS opponentScore,
@@ -341,6 +379,16 @@ async function queryMatchList(input: {
             COALESCE(winner_stats.total_healing_used, 0) AS totalHealingUsed,
             NULLIF(winner_stats.final_kill_by, '') AS finalKillBy,
             NULLIF(winner_stats.final_death_by, '') AS finalDeathBy,
+            (
+              SELECT GROUP_CONCAT(
+                COALESCE(team_winner_profile.player_name, LEFT(LOWER(HEX(team_winner.player_uuid)), 12))
+                ORDER BY COALESCE(team_winner_profile.player_name, LEFT(LOWER(HEX(team_winner.player_uuid)), 12)) ASC
+                SEPARATOR '||'
+              )
+              FROM player_match_stats team_winner
+              LEFT JOIN player_web_profile team_winner_profile ON team_winner_profile.unique_id = team_winner.player_uuid
+              WHERE team_winner.match_id = m.match_id AND team_winner.wins > 0
+            ) AS winningPlayersRaw,
             NULLIF(winner_stats.winner_inventory_snapshot, '') AS winnerInventoryRaw,
             (
               SELECT GROUP_CONCAT(CONCAT(COALESCE(ev.event_second, 0), '::', REPLACE(ev.description, '||', '|')) ORDER BY ev.event_second SEPARATOR '||')
@@ -349,7 +397,14 @@ async function queryMatchList(input: {
             ) AS timelineRaw
           FROM uhc_match m
           INNER JOIN player_match_stats winner_stats
-            ON winner_stats.match_id = m.match_id AND winner_stats.wins > 0
+            ON winner_stats.match_id = m.match_id
+            AND winner_stats.player_uuid = (
+              SELECT winner_pick.player_uuid
+              FROM player_match_stats winner_pick
+              WHERE winner_pick.match_id = m.match_id AND winner_pick.wins > 0
+              ORDER BY COALESCE(winner_pick.kills, 0) DESC, winner_pick.recorded_at ASC
+              LIMIT 1
+            )
           LEFT JOIN player_web_profile winner_profile
             ON winner_profile.unique_id = winner_stats.player_uuid
           LEFT JOIN player_profile winner_profile_meta
@@ -371,7 +426,14 @@ async function queryMatchList(input: {
           SELECT COUNT(*) AS total
           FROM uhc_match m
           INNER JOIN player_match_stats winner_stats
-            ON winner_stats.match_id = m.match_id AND winner_stats.wins > 0
+            ON winner_stats.match_id = m.match_id
+            AND winner_stats.player_uuid = (
+              SELECT winner_pick.player_uuid
+              FROM player_match_stats winner_pick
+              WHERE winner_pick.match_id = m.match_id AND winner_pick.wins > 0
+              ORDER BY COALESCE(winner_pick.kills, 0) DESC, winner_pick.recorded_at ASC
+              LIMIT 1
+            )
           ${globalWhere}
         `);
 
@@ -379,6 +441,7 @@ async function queryMatchList(input: {
       Omit<MatchListItem, "modeName" | "timelineEvents" | "winnerInventoryItems" | "winnerInventory"> & {
         playerUuidHex?: string | null;
         timelineRaw?: string | null;
+        winningPlayersRaw?: string | null;
         winnerInventoryRaw?: string | null;
       }
     >(modernRowsRaw);
@@ -389,7 +452,7 @@ async function queryMatchList(input: {
     );
 
     const modernItems: MatchListItem[] = modernRows.map((row) => {
-      const { playerUuidHex, timelineRaw, winnerInventoryRaw, ...baseRow } = row;
+      const { playerUuidHex, timelineRaw, winningPlayersRaw, winnerInventoryRaw, ...baseRow } = row;
       const uuidHex = (playerUuidHex ?? "").toLowerCase();
       const fallbackRank = (baseRow.playerRankKey ?? "default").toLowerCase();
       const resolvedRankKey = luckPermsGroups.get(uuidHex) ?? fallbackRank;
@@ -417,6 +480,8 @@ async function queryMatchList(input: {
       return {
         ...baseRow,
         modeName: prettifyModeLabel(baseRow.modeSlug),
+        modeKey: normalizeModeKey(String(baseRow.modeKey ?? "")),
+        isCustomGame: Boolean(baseRow.isCustomGame),
         playedAt: new Date(baseRow.playedAt),
         playerScore: Number(baseRow.playerScore ?? 0),
         playerRankKey: resolvedRankKey,
@@ -432,6 +497,7 @@ async function queryMatchList(input: {
         survivalTimeSeconds: baseRow.survivalTimeSeconds !== null ? Number(baseRow.survivalTimeSeconds) : null,
         totalHealingUsed: baseRow.totalHealingUsed !== null ? Number(baseRow.totalHealingUsed) : null,
         timelineEvents,
+        winningTeamPlayers: parseWinningPlayersRaw(winningPlayersRaw),
         winnerInventoryItems,
         winnerInventory,
       };
@@ -484,6 +550,8 @@ async function queryMatchList(input: {
         opponentName: matches.opponentName,
         modeSlug: gameModes.slug,
         modeName: gameModes.name,
+        modeKey: sql<string>`'unknown'`,
+        isCustomGame: sql<number>`0`,
         result: matches.result,
         playerScore: matches.playerScore,
         opponentScore: matches.opponentScore,
@@ -503,6 +571,7 @@ async function queryMatchList(input: {
         totalHealingUsed: sql<number | null>`NULL`,
         finalKillBy: sql<string | null>`NULL`,
         finalDeathBy: sql<string | null>`NULL`,
+        winningPlayersRaw: sql<string | null>`NULL`,
         winnerInventoryRaw: sql<string | null>`NULL`,
         timelineRaw: sql<string | null>`NULL`,
       })
@@ -522,8 +591,11 @@ async function queryMatchList(input: {
     const total = Number(countRow?.total ?? 0);
     const items: MatchListItem[] = rows.map((row) => ({
       ...row,
+      modeKey: normalizeModeKey(String(row.modeKey ?? "")),
+      isCustomGame: Boolean(row.isCustomGame),
       playedAt: new Date(row.playedAt),
       timelineEvents: [],
+      winningTeamPlayers: [],
       winnerInventoryItems: [],
       winnerInventory: null,
     }));

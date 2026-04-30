@@ -112,7 +112,7 @@ export default function MatchHistoryCard({ match, showPrimaryPlayer = true, comp
               {tone.label}
             </span>
             <span className="text-[10px] uppercase tracking-[0.1em] px-2 py-1 rounded-full bg-[rgba(255,255,255,0.08)] text-[#CFCFD6]">
-              {match.modeName}
+              {match.modeName}{match.isCustomGame ? " · Custom" : ""}
             </span>
           </div>
           <span className="text-[10px] uppercase tracking-[0.12em] text-mn-dim shrink-0">Match {shortMatchId}</span>
@@ -194,6 +194,8 @@ function Metric({ label, value, highlight = false }: { label: string; value: str
 
 function WinnerBlock({ match }: { match: MatchListItem }) {
   const username = match.playerUsername ?? "Unknown";
+  const effectiveTeamSize = match.teamSize ?? Math.max(1, match.winningTeamPlayers.length);
+  const winnerLabel = effectiveTeamSize > 1 ? "Winning Team" : "Winner";
   const rankIcon = getRankIconPath(match.playerRankKey);
   const level = match.playerLevel ?? 1;
   const bodyRender = `https://mc-heads.net/body/${encodeURIComponent(username)}/right`;
@@ -215,7 +217,10 @@ function WinnerBlock({ match }: { match: MatchListItem }) {
 
         <div className="min-w-0 flex-1">
           <p className="text-[10px] uppercase tracking-[0.1em] font-semibold mb-1 text-[#E8FF9A] drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-            Victory
+            {winnerLabel}
+          </p>
+          <p className="text-[11px] text-[#7A7A86] mb-1.5">
+            Team Size {match.teamSize ?? "N/A"}
           </p>
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             {rankIcon && (
@@ -237,6 +242,11 @@ function WinnerBlock({ match }: { match: MatchListItem }) {
             </span>
             <span className="text-[#7A7A86] text-[12px]">• Click profile</span>
           </div>
+          {match.winningTeamPlayers.length > 0 && (
+            <p className="mt-1 text-[12px] text-[#BFD4B0] truncate">
+              Survivors: {match.winningTeamPlayers.join(", ")}
+            </p>
+          )}
         </div>
       </div>
     </Link>

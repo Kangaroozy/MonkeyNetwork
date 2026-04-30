@@ -43,7 +43,7 @@ export default function MatchHistory() {
 
   const pageStats = useMemo(() => {
     const items = data?.items ?? [];
-    const winnerCount = new Set(items.map((entry) => (entry.playerUsername ?? "").toLowerCase()).filter(Boolean)).size;
+    const winnerCount = new Set(items.map((entry) => (entry.matchPublicId ?? entry.id).toLowerCase()).filter(Boolean)).size;
     const totalKills = items.reduce((sum, entry) => sum + (entry.kills ?? entry.playerScore ?? 0), 0);
     return {
       matches: items.length,
@@ -117,7 +117,7 @@ export default function MatchHistory() {
 
         <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
           <TopStat label="Total matches played" value={String(pageStats.totalMatchesPlayed)} accent="#C4FF4D" />
-          <TopStat label="Unique winners" value={String(pageStats.uniqueWinners)} accent="#2ECC71" />
+          <TopStat label="Winning teams" value={String(pageStats.uniqueWinners)} accent="#2ECC71" />
           <TopStat label="Total kills" value={String(pageStats.totalKills)} accent="#9B59B6" />
         </div>
       </div>
