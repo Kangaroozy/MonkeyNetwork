@@ -372,7 +372,7 @@ const isServerlessRuntime =
   !!process.env.NETLIFY ||
   !!process.env.VERCEL;
 
-if (env.isProduction && !isServerlessRuntime) {
+async function startProductionServer() {
   const { serve } = await import("@hono/node-server");
   const { serveStaticFiles } = await import("./lib/vite");
   serveStaticFiles(app);
@@ -380,5 +380,12 @@ if (env.isProduction && !isServerlessRuntime) {
   const port = parseInt(process.env.PORT || "3000");
   serve({ fetch: app.fetch, port }, () => {
     console.log(`Server running on http://localhost:${port}/`);
+  });
+}
+
+if (env.isProduction && !isServerlessRuntime) {
+  void startProductionServer().catch((error) => {
+    console.error("Failed to start production server", error);
+    process.exit(1);
   });
 }
