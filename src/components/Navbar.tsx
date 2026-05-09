@@ -40,6 +40,10 @@ export default function Navbar() {
     { query: debouncedQuery, limit: 8 },
     { enabled: debouncedQuery.length >= 1 }
   );
+  const { data: me } = trpc.clan.me.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
@@ -104,6 +108,7 @@ export default function Navbar() {
     { label: "Leaderboards", href: "/" },
     { label: "Match History", href: "/matches" },
   ];
+  const showClanAdminLink = me?.isAdmin === true;
   const discordUrl = "https://discord.gg/tkE6BzXA3Q";
 
   return (
@@ -145,6 +150,35 @@ export default function Navbar() {
               )}
             </Link>
           ))}
+          <Link
+            to="/clans"
+            className="relative rounded-lg border px-3 py-1.5 text-[13px] font-semibold uppercase tracking-[0.04em] transition-all duration-200"
+            style={{
+              color: "#E8EDE5",
+              borderColor: "rgba(196,255,77,0.55)",
+              background:
+                location.pathname === "/clans"
+                  ? "linear-gradient(90deg, rgba(196,255,77,0.26), rgba(102,255,220,0.2))"
+                  : "linear-gradient(90deg, rgba(196,255,77,0.16), rgba(102,255,220,0.12))",
+              boxShadow: "0 0 22px rgba(196,255,77,0.24)",
+            }}
+          >
+            Clan War Event
+          </Link>
+          {showClanAdminLink ? (
+            <Link
+              to="/admin/clans"
+              className="text-[14px] font-medium transition-colors duration-200 relative py-1"
+              style={{
+                color: location.pathname === "/admin/clans" ? "#E8EDE5" : "#9BA39A",
+              }}
+            >
+              Clan Admin
+              {location.pathname === "/admin/clans" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-mn-lime rounded-full shadow-[0_0_12px_rgba(196,255,77,0.45)]" />
+              )}
+            </Link>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-3" ref={searchRootRef}>
@@ -308,6 +342,22 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            to="/clans"
+            onClick={() => setShowMobileMenu(false)}
+            className="mt-1 block rounded-lg border border-mn-lime/45 bg-[linear-gradient(90deg,rgba(196,255,77,0.16),rgba(102,255,220,0.12))] px-3 py-3 text-[14px] font-semibold text-mn-mist shadow-[0_0_22px_rgba(196,255,77,0.22)] transition-colors hover:bg-[linear-gradient(90deg,rgba(196,255,77,0.22),rgba(102,255,220,0.16))]"
+          >
+            Clan War Event
+          </Link>
+          {showClanAdminLink ? (
+            <Link
+              to="/admin/clans"
+              onClick={() => setShowMobileMenu(false)}
+              className="block py-3 text-[14px] font-medium text-mn-fog hover:text-mn-mist transition-colors"
+            >
+              Clan Admin
+            </Link>
+          ) : null}
           <a
             href={discordUrl}
             target="_blank"

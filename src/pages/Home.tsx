@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Crown, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { formatNumber, formatWinRate, modeColor, modeLabel } from "@/lib/tiers";
@@ -123,6 +123,15 @@ function HeroSection({ onLeaderboardClick }: HeroSectionProps) {
             </span>
             Leaderboard
           </button>
+          <Link
+            to="/clans"
+            className="relative inline-flex items-center gap-2.5 rounded-lg border border-mn-lime/60 bg-[linear-gradient(90deg,rgba(196,255,77,0.26),rgba(102,255,220,0.18))] pl-3 pr-4 py-2 text-[13px] font-bold tracking-[0.04em] text-mn-mist uppercase shadow-[0_0_36px_rgba(196,255,77,0.32)] transition-transform duration-200 hover:scale-[1.03] hover:shadow-[0_0_42px_rgba(196,255,77,0.42)]"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-mn-lime/25 text-mn-lime">
+              <Crown className="w-3.5 h-3.5" />
+            </span>
+            Clan War Event
+          </Link>
         </div>
       </div>
 
