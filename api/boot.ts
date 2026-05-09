@@ -367,7 +367,12 @@ app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;
 
-if (env.isProduction) {
+const isServerlessRuntime =
+  !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  !!process.env.NETLIFY ||
+  !!process.env.VERCEL;
+
+if (env.isProduction && !isServerlessRuntime) {
   const { serve } = await import("@hono/node-server");
   const { serveStaticFiles } = await import("./lib/vite");
   serveStaticFiles(app);
