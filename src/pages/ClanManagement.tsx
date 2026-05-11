@@ -588,7 +588,8 @@ export default function ClanManagement() {
                   the event list.
                 </p>
                 <p className="mt-1 text-amber-100">
-                  You can still edit members, colors, and settings while you wait. Changes are saved immediately.
+                  You can still edit members, colors, and settings while you wait. Any changes stay pending until an
+                  admin approves, and only approved rosters sync in-game.
                 </p>
               </div>
             ) : null}
@@ -613,7 +614,8 @@ export default function ClanManagement() {
             ) : null}
             {payload.clan.reviewStatus === "APPROVED" ? (
               <p className="mt-3 rounded-md border border-mn-lime/40 bg-mn-lime/10 px-3 py-2 text-sm text-mn-lime">
-                Your clan is approved for the event.
+                Your clan is approved for the event. If you make edits, it will return to pending review until admins
+                approve again.
               </p>
             ) : null}
           </div>

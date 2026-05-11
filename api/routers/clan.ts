@@ -150,7 +150,7 @@ async function getClanWithMembers(clanId: number) {
 async function markClanPendingAfterPlayerEdit(clanId: number) {
   const db = getClashDb();
   const [clan] = await db.select().from(clashClans).where(eq(clashClans.id, clanId)).limit(1);
-  if (!clan || clan.reviewStatus !== "DECLINED") return false;
+  if (!clan || clan.reviewStatus === "PENDING") return false;
   await db
     .update(clashClans)
     .set({
