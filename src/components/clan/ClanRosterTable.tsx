@@ -40,7 +40,7 @@ export default function ClanRosterTable({
               <td className="px-4 py-3">
                 {member.isLeader === 1 ? (
                   <span className="rounded-md bg-mn-lime/20 px-2 py-1 text-xs font-semibold text-mn-lime">
-                    King
+                    Leader
                   </span>
                 ) : (
                   <span className="text-mn-fog">Member</span>
@@ -55,7 +55,7 @@ export default function ClanRosterTable({
                         onClick={() => onPromote(member.id)}
                         className="rounded-md border border-mn-lime/40 px-2 py-1 text-xs text-mn-lime transition-all hover:bg-mn-lime/15 active:scale-[0.98]"
                       >
-                        Set King
+                        Set Leader
                       </button>
                     ) : null}
                     {member.isLeader !== 1 && onRemove ? (

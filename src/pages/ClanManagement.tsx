@@ -340,7 +340,7 @@ export default function ClanManagement() {
                   </p>
                   <div className="mt-3 grid gap-3 md:grid-cols-[170px_1fr]">
                     <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                      <p className="mb-1 text-[11px] text-mn-fog">King</p>
+                      <p className="mb-1 text-[11px] text-mn-fog">Leader</p>
                       {clan.king ? (
                         <>
                           <img
@@ -352,7 +352,7 @@ export default function ClanManagement() {
                           <p className="mt-1 text-center text-xs text-mn-mist">{clan.king}</p>
                         </>
                       ) : (
-                        <p className="text-xs text-mn-fog">No king set</p>
+                        <p className="text-xs text-mn-fog">No leader set</p>
                       )}
                     </div>
                     <div>
@@ -456,7 +456,7 @@ export default function ClanManagement() {
                 </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-[170px_1fr]">
                   <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                    <p className="mb-1 text-[11px] text-mn-fog">King</p>
+                    <p className="mb-1 text-[11px] text-mn-fog">Leader</p>
                     {clan.king ? (
                       <>
                         <img
@@ -468,7 +468,7 @@ export default function ClanManagement() {
                         <p className="mt-1 text-center text-xs text-mn-mist">{clan.king}</p>
                       </>
                     ) : (
-                      <p className="text-xs text-mn-fog">No king set</p>
+                      <p className="text-xs text-mn-fog">No leader set</p>
                     )}
                   </div>
                   <div>
@@ -524,7 +524,7 @@ export default function ClanManagement() {
         <div className="rounded-xl border border-white/10 bg-mn-moss/70 p-6">
           <h2 className="text-lg font-semibold text-mn-mist">No Clan Created Yet</h2>
           <p className="mt-2 text-sm text-mn-fog">
-            Create your clan in the dedicated setup page with king, members, color, trim, and material.
+            Create your clan in the dedicated setup page with leader, members, color, trim, and material.
           </p>
           <div className="mt-4">
             <Link

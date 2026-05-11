@@ -69,7 +69,7 @@ export default function ClanDirectory() {
 
               <div className="grid gap-5 lg:grid-cols-[240px_1fr]">
                 <div className="rounded-xl border border-white/[0.1] bg-mn-void/70 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-mn-dim">King</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-mn-dim">Leader</p>
                   {clan.king ? (
                     <div className="overflow-hidden rounded-lg border border-white/[0.12] bg-black/25 p-2">
                       <img
@@ -82,7 +82,7 @@ export default function ClanDirectory() {
                     </div>
                   ) : (
                     <div className="rounded-lg border border-dashed border-white/15 px-3 py-8 text-center text-xs text-mn-fog">
-                      No king assigned
+                      No leader assigned
                     </div>
                   )}
                 </div>

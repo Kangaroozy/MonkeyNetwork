@@ -103,7 +103,7 @@ export default function ClanPublicPage() {
                 </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-[170px_1fr]">
                   <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                    <p className="mb-1 text-[11px] text-mn-fog">King</p>
+                    <p className="mb-1 text-[11px] text-mn-fog">Leader</p>
                     {clan.king ? (
                       <>
                         <img
@@ -115,7 +115,7 @@ export default function ClanPublicPage() {
                         <p className="mt-1 text-center text-xs text-mn-mist">{clan.king}</p>
                       </>
                     ) : (
-                      <p className="text-xs text-mn-fog">No king set</p>
+                      <p className="text-xs text-mn-fog">No leader set</p>
                     )}
                   </div>
                   <div>

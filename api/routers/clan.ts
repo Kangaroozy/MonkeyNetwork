@@ -27,7 +27,7 @@ function normalizeUsername(value: string): string {
 
 const createClanSchema = z.object({
   name: z.string().trim().min(2).max(64),
-  kingUsername: z.string().trim().regex(MINECRAFT_NAME_REGEX, "Invalid king Minecraft username."),
+  kingUsername: z.string().trim().regex(MINECRAFT_NAME_REGEX, "Invalid leader Minecraft username."),
   memberUsernames: z.array(z.string().trim().regex(MINECRAFT_NAME_REGEX)).max(19),
   discordServerLink: z.string().trim().regex(DISCORD_INVITE_REGEX, "Enter a valid Discord invite link."),
   trim: z.enum(CLASH_TRIM_OPTIONS),
@@ -529,7 +529,7 @@ export const clanRouter = createRouter({
       if (member.isLeader === 1) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Use leader change before removing the current king.",
+          message: "Use leader change before removing the current leader.",
         });
       }
       await db.delete(clashClanMembers).where(eq(clashClanMembers.id, member.id));

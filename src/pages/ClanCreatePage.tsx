@@ -171,7 +171,7 @@ export default function ClanCreatePage() {
       return;
     }
     if (candidate.toLowerCase() === cleanKing.toLowerCase()) {
-      setRosterNotice("King username is already included separately.");
+      setRosterNotice("Leader username is already included separately.");
       return;
     }
     if (members.some((name) => name.toLowerCase() === candidate.toLowerCase())) {
@@ -179,7 +179,7 @@ export default function ClanCreatePage() {
       return;
     }
     if (members.length >= maxAdditionalMembers) {
-      setRosterNotice(`You can add up to ${maxAdditionalMembers} members (max ${maxTotalMembers} total with king).`);
+      setRosterNotice(`You can add up to ${maxAdditionalMembers} members (max ${maxTotalMembers} total with leader).`);
       return;
     }
     setMembers((prev) => [...prev, candidate]);
@@ -394,10 +394,10 @@ export default function ClanCreatePage() {
                 value={kingUsername}
                 onChange={(event) => setKingUsername(event.target.value)}
                 className="rounded-md border border-white/15 bg-mn-leaf px-3 py-2 text-sm text-mn-mist"
-                placeholder="King Username"
+                placeholder="Leader Username"
               />
               {!canContinueBasics ? (
-                <p className="text-xs text-mn-fog/80">Enter a clan name and a valid king username to continue.</p>
+                <p className="text-xs text-mn-fog/80">Enter a clan name and a valid leader username to continue.</p>
               ) : null}
             </div>
           ) : null}
@@ -481,7 +481,7 @@ export default function ClanCreatePage() {
                       <span className="text-mn-fog">Preview: </span>
                       <span style={{ color: MINECRAFT_COLOR_HEX[color] }}>[{cleanClanName || "CLAN"}]</span>
                       <span className="text-mn-fog"> </span>
-                      <span style={{ color: MINECRAFT_COLOR_HEX[color] }}>{cleanKing || "KingName"}</span>
+                      <span style={{ color: MINECRAFT_COLOR_HEX[color] }}>{cleanKing || "LeaderName"}</span>
                     </div>
                   </div>
                 </div>
@@ -515,7 +515,7 @@ export default function ClanCreatePage() {
             <div className="grid gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm text-mn-fog">
-                  Add members one by one (up to {maxAdditionalMembers}). Clan size must be 10 minimum and {maxTotalMembers} maximum (including king).
+                  Add members one by one (up to {maxAdditionalMembers}). Clan size must be 10 minimum and {maxTotalMembers} maximum (including leader).
                 </p>
                 <span className="rounded-md border border-white/15 px-2 py-1 text-xs text-mn-mist">
                   {members.length}/{maxAdditionalMembers}
@@ -562,7 +562,7 @@ export default function ClanCreatePage() {
               )}
               {!meetsMinimumRoster ? (
                 <p className="text-xs text-amber-200">
-                  You currently have {totalMembers}/{maxTotalMembers} total players (including king). Minimum required is{" "}
+                  You currently have {totalMembers}/{maxTotalMembers} total players (including leader). Minimum required is{" "}
                   {MIN_TOTAL_MEMBERS}.
                 </p>
               ) : (
@@ -581,7 +581,7 @@ export default function ClanCreatePage() {
                   <span className="text-mn-fog">Clan:</span> {cleanClanName || "-"}
                 </p>
                 <p>
-                  <span className="text-mn-fog">King:</span> {cleanKing || "-"}
+                  <span className="text-mn-fog">Leader:</span> {cleanKing || "-"}
                 </p>
                 <p>
                   <span className="text-mn-fog">Style:</span> {trim} / {material} / {color}
@@ -593,12 +593,12 @@ export default function ClanCreatePage() {
                   <span className="text-mn-fog">Members:</span> {members.length}
                 </p>
                 <p>
-                  <span className="text-mn-fog">Total players (with king):</span> {totalMembers}/{maxTotalMembers}
+                  <span className="text-mn-fog">Total players (with leader):</span> {totalMembers}/{maxTotalMembers}
                 </p>
               </div>
               {!meetsMinimumRoster ? (
                 <p className="text-xs text-amber-200">
-                  Clan creation requires at least {MIN_TOTAL_MEMBERS} total players (king + members).
+                  Clan creation requires at least {MIN_TOTAL_MEMBERS} total players (leader + members).
                 </p>
               ) : null}
               {!withinMaximumRoster ? (
