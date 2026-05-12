@@ -14,7 +14,7 @@ import {
   parseSessionCookieValue,
   verifyPassword,
 } from "./lib/session";
-import { getClashDb } from "./queries/clashConnection";
+import { ensureClashSchemaCompatibility, getClashDb } from "./queries/clashConnection";
 import { and, eq, sql } from "drizzle-orm";
 import { clashAccounts, clashClanMembers, clashClans, clashEvents } from "@db/schema";
 
@@ -23,6 +23,7 @@ const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const AUTH_BLOCK_MS = 15 * 60 * 1000;
 const LOGIN_MAX_ATTEMPTS = 10;
 const REGISTER_MAX_ATTEMPTS = 5;
+const FALLBACK_MIN_MEMBERS_PER_CLAN = 8;
 type RateLimitEntry = {
   count: number;
   windowStart: number;
@@ -97,6 +98,16 @@ function normalizeUsername(value: string): string {
   return value.trim().toLowerCase();
 }
 
+function isMissingMinMembersColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = "code" in error ? error.code : "";
+  const message = "message" in error ? error.message : "";
+  return (
+    code === "ER_BAD_FIELD_ERROR" ||
+    (typeof message === "string" && message.toLowerCase().includes("min_members_per_clan"))
+  );
+}
+
 function isAdminUsername(username: string): boolean {
   const allowlist = new Set(
     env.clanAdminUsernames
@@ -108,13 +119,57 @@ function isAdminUsername(username: string): boolean {
 }
 
 async function buildPluginSyncPayload() {
+  await ensureClashSchemaCompatibility();
   const db = getClashDb();
-  const [activeEvent] = await db
-    .select()
-    .from(clashEvents)
-    .where(eq(clashEvents.isActive, 1))
-    .orderBy(sql`${clashEvents.updatedAt} DESC`)
-    .limit(1);
+  let activeEvent:
+    | (typeof clashEvents.$inferSelect)
+    | {
+        id: number;
+        slug: string;
+        name: string;
+        maxMembersPerClan: number;
+        lockAt: Date | null;
+        isActive: number;
+        createdAt: Date;
+        updatedAt: Date;
+        minMembersPerClan: number;
+      }
+    | undefined;
+
+  try {
+    const [nextEvent] = await db
+      .select()
+      .from(clashEvents)
+      .where(eq(clashEvents.isActive, 1))
+      .orderBy(sql`${clashEvents.updatedAt} DESC`)
+      .limit(1);
+    activeEvent = nextEvent;
+  } catch (error) {
+    if (!isMissingMinMembersColumnError(error)) {
+      throw error;
+    }
+    const [legacyEvent] = await db
+      .select({
+        id: clashEvents.id,
+        slug: clashEvents.slug,
+        name: clashEvents.name,
+        maxMembersPerClan: clashEvents.maxMembersPerClan,
+        lockAt: clashEvents.lockAt,
+        isActive: clashEvents.isActive,
+        createdAt: clashEvents.createdAt,
+        updatedAt: clashEvents.updatedAt,
+      })
+      .from(clashEvents)
+      .where(eq(clashEvents.isActive, 1))
+      .orderBy(sql`${clashEvents.updatedAt} DESC`)
+      .limit(1);
+    activeEvent = legacyEvent
+      ? {
+          ...legacyEvent,
+          minMembersPerClan: FALLBACK_MIN_MEMBERS_PER_CLAN,
+        }
+      : undefined;
+  }
   if (!activeEvent) {
     return {
       version: "1.0",

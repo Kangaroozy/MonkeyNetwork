@@ -15,15 +15,26 @@ import {
   CLASH_TRIM_OPTIONS,
 } from "@db/schema";
 import { adminProcedure, createRouter, protectedProcedure, publicQuery } from "../middleware";
-import { getClashDb } from "../queries/clashConnection";
+import { ensureClashSchemaCompatibility, getClashDb } from "../queries/clashConnection";
 import { hashPassword } from "../lib/session";
 
 const MINECRAFT_NAME_REGEX = /^[A-Za-z0-9_]{3,16}$/;
 const EVENT_MIN_MEMBERS_FLOOR = 2;
 const EVENT_MAX_MEMBERS_CEILING = 100;
+const FALLBACK_MIN_MEMBERS_PER_CLAN = 8;
 const DISCORD_INVITE_REGEX = /^https?:\/\/(www\.)?(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]{2,}$/i;
 function normalizeUsername(value: string): string {
   return value.trim().toLowerCase();
+}
+
+function isMissingMinMembersColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = "code" in error ? error.code : "";
+  const message = "message" in error ? error.message : "";
+  return (
+    code === "ER_BAD_FIELD_ERROR" ||
+    (typeof message === "string" && message.toLowerCase().includes("min_members_per_clan"))
+  );
 }
 
 const createClanSchema = z.object({
@@ -41,13 +52,57 @@ const addMemberSchema = z.object({
 });
 
 async function getActiveEvent() {
+  await ensureClashSchemaCompatibility();
   const db = getClashDb();
-  const [event] = await db
-    .select()
-    .from(clashEvents)
-    .where(eq(clashEvents.isActive, 1))
-    .orderBy(desc(clashEvents.updatedAt))
-    .limit(1);
+  let event:
+    | (typeof clashEvents.$inferSelect)
+    | {
+        id: number;
+        slug: string;
+        name: string;
+        maxMembersPerClan: number;
+        lockAt: Date | null;
+        isActive: number;
+        createdAt: Date;
+        updatedAt: Date;
+        minMembersPerClan: number;
+      }
+    | undefined;
+
+  try {
+    const [nextEvent] = await db
+      .select()
+      .from(clashEvents)
+      .where(eq(clashEvents.isActive, 1))
+      .orderBy(desc(clashEvents.updatedAt))
+      .limit(1);
+    event = nextEvent;
+  } catch (error) {
+    if (!isMissingMinMembersColumnError(error)) {
+      throw error;
+    }
+    const [legacyEvent] = await db
+      .select({
+        id: clashEvents.id,
+        slug: clashEvents.slug,
+        name: clashEvents.name,
+        maxMembersPerClan: clashEvents.maxMembersPerClan,
+        lockAt: clashEvents.lockAt,
+        isActive: clashEvents.isActive,
+        createdAt: clashEvents.createdAt,
+        updatedAt: clashEvents.updatedAt,
+      })
+      .from(clashEvents)
+      .where(eq(clashEvents.isActive, 1))
+      .orderBy(desc(clashEvents.updatedAt))
+      .limit(1);
+    event = legacyEvent
+      ? {
+          ...legacyEvent,
+          minMembersPerClan: FALLBACK_MIN_MEMBERS_PER_CLAN,
+        }
+      : undefined;
+  }
   if (!event) {
     throw new TRPCError({ code: "NOT_FOUND", message: "No active Clash event is configured." });
   }
@@ -676,13 +731,32 @@ export const clanRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getClashDb();
       const event = await getActiveEvent();
-      await db
-        .update(clashEvents)
-        .set({
-          minMembersPerClan: input.minMembersPerClan,
-          maxMembersPerClan: input.maxMembersPerClan,
-        })
-        .where(eq(clashEvents.id, event.id));
+      try {
+        await db
+          .update(clashEvents)
+          .set({
+            minMembersPerClan: input.minMembersPerClan,
+            maxMembersPerClan: input.maxMembersPerClan,
+          })
+          .where(eq(clashEvents.id, event.id));
+      } catch (error) {
+        if (!isMissingMinMembersColumnError(error)) {
+          throw error;
+        }
+        await db
+          .update(clashEvents)
+          .set({
+            maxMembersPerClan: input.maxMembersPerClan,
+          })
+          .where(eq(clashEvents.id, event.id));
+        if (input.minMembersPerClan !== FALLBACK_MIN_MEMBERS_PER_CLAN) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "Database migration required to change minimum team size. Run db:push:clash to add min_members_per_clan.",
+          });
+        }
+      }
       await writeAudit({
         eventId: event.id,
         actorAccountId: String(ctx.session.accountId),
