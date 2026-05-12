@@ -10,8 +10,11 @@ export default function AdminClanManagement() {
   });
 
   const [lockAtInput, setLockAtInput] = useState("");
+  const [minMembersInput, setMinMembersInput] = useState("");
+  const [maxMembersInput, setMaxMembersInput] = useState("");
   const [declineReasonByClan, setDeclineReasonByClan] = useState<Record<number, string>>({});
   const [lockAction, setLockAction] = useState<"set" | "clear" | null>(null);
+  const [memberLimitsAction, setMemberLimitsAction] = useState(false);
   const [resetUsername, setResetUsername] = useState("");
   const [resetPassword, setResetPassword] = useState("");
   const [resetNotice, setResetNotice] = useState("");
@@ -29,6 +32,16 @@ export default function AdminClanManagement() {
       await clansQuery.refetch();
     },
   });
+  const setMemberLimitsMutation = trpc.clan.adminSetMemberLimits.useMutation({
+    onSuccess: async () => {
+      setMinMembersInput("");
+      setMaxMembersInput("");
+      await clansQuery.refetch();
+    },
+    onSettled: () => {
+      setMemberLimitsAction(false);
+    },
+  });
   const resetPasswordMutation = trpc.clan.adminResetAccountPassword.useMutation({
     onSuccess: (payload) => {
       setResetNotice(`Password reset for ${payload.minecraftUsername}.`);
@@ -42,12 +55,14 @@ export default function AdminClanManagement() {
       clansQuery.error?.message ??
       setLockMutation.error?.message ??
       reviewClanMutation.error?.message ??
+      setMemberLimitsMutation.error?.message ??
       resetPasswordMutation.error?.message
     );
   }, [
     clansQuery.error?.message,
     meQuery.error?.message,
     resetPasswordMutation.error?.message,
+    setMemberLimitsMutation.error?.message,
     setLockMutation.error?.message,
     reviewClanMutation.error?.message,
   ]);
@@ -216,6 +231,55 @@ export default function AdminClanManagement() {
             <Unlock className={`h-3.5 w-3.5 ${lockAction === "clear" && setLockMutation.isPending ? "animate-pulse" : ""}`} />
             Clear Lock
           </button>
+        </div>
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <p className="text-sm text-mn-fog">
+            Team size limits:{" "}
+            <span className="text-mn-mist">
+              {clansQuery.data?.event.minMembersPerClan ?? 0} min / {clansQuery.data?.event.maxMembersPerClan ?? 0} max
+            </span>
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <input
+              type="number"
+              min={2}
+              value={minMembersInput || String(clansQuery.data?.event.minMembersPerClan ?? "")}
+              onChange={(event) => setMinMembersInput(event.target.value)}
+              className="w-24 rounded-md border border-white/15 bg-mn-leaf px-3 py-2 text-sm text-mn-mist"
+              placeholder="Min"
+            />
+            <input
+              type="number"
+              min={2}
+              value={maxMembersInput || String(clansQuery.data?.event.maxMembersPerClan ?? "")}
+              onChange={(event) => setMaxMembersInput(event.target.value)}
+              className="w-24 rounded-md border border-white/15 bg-mn-leaf px-3 py-2 text-sm text-mn-mist"
+              placeholder="Max"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const minToSave = Number(minMembersInput || (clansQuery.data?.event.minMembersPerClan ?? 0));
+                const maxToSave = Number(maxMembersInput || (clansQuery.data?.event.maxMembersPerClan ?? 0));
+                setMemberLimitsAction(true);
+                setMemberLimitsMutation.mutate({
+                  minMembersPerClan: minToSave,
+                  maxMembersPerClan: maxToSave,
+                });
+              }}
+              disabled={setMemberLimitsMutation.isPending}
+              className={`inline-flex items-center gap-2 rounded-lg border border-mn-lime/40 bg-mn-lime/15 px-4 py-2 text-sm font-semibold text-mn-lime transition-all hover:bg-mn-lime/20 active:scale-[0.98] disabled:opacity-60 ${
+                memberLimitsAction && setMemberLimitsMutation.isPending
+                  ? "shadow-[0_0_18px_rgba(196,255,77,0.28)]"
+                  : ""
+              }`}
+            >
+              {setMemberLimitsMutation.isPending ? (
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-mn-lime/40 border-t-mn-lime" />
+              ) : null}
+              Save Team Limits
+            </button>
+          </div>
         </div>
       </div>
 

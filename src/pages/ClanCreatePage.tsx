@@ -53,7 +53,6 @@ type ClashColor =
 const MINECRAFT_NAME_REGEX = /^[A-Za-z0-9_]{3,16}$/;
 const DISCORD_INVITE_REGEX = /^https?:\/\/(www\.)?(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]{2,}$/i;
 const STEP_TITLES = ["Clan Basics", "Style", "Discord", "Members", "Review"] as const;
-const MIN_TOTAL_MEMBERS = 8;
 const MINECRAFT_COLOR_HEX: Record<ClashColor, string> = {
   BLACK: "#000000",
   DARK_BLUE: "#0000AA",
@@ -117,9 +116,10 @@ export default function ClanCreatePage() {
   const canContinueStyle = !optionsQuery.isLoading && !optionsQuery.error;
   const canContinueDiscord = DISCORD_INVITE_REGEX.test(discordServerLink.trim());
   const maxTotalMembers = myClanQuery.data?.event.maxMembersPerClan ?? 10;
+  const minTotalMembers = myClanQuery.data?.event.minMembersPerClan ?? 8;
   const maxAdditionalMembers = Math.max(maxTotalMembers - 1, 0);
   const totalMembers = members.length + 1;
-  const meetsMinimumRoster = totalMembers >= MIN_TOTAL_MEMBERS;
+  const meetsMinimumRoster = totalMembers >= minTotalMembers;
   const withinMaximumRoster = totalMembers <= maxTotalMembers;
   const canCreateClan = canContinueBasics && canContinueStyle && meetsMinimumRoster && withinMaximumRoster;
   const progressPercent = ((step + 1) / STEP_TITLES.length) * 100;
@@ -515,7 +515,8 @@ export default function ClanCreatePage() {
             <div className="grid gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm text-mn-fog">
-                  Add members one by one (up to {maxAdditionalMembers}). Clan size must be 10 minimum and {maxTotalMembers} maximum (including leader).
+                  Add members one by one (up to {maxAdditionalMembers}). Clan size must be {minTotalMembers} minimum and{" "}
+                  {maxTotalMembers} maximum (including leader).
                 </p>
                 <span className="rounded-md border border-white/15 px-2 py-1 text-xs text-mn-mist">
                   {members.length}/{maxAdditionalMembers}
@@ -563,11 +564,11 @@ export default function ClanCreatePage() {
               {!meetsMinimumRoster ? (
                 <p className="text-xs text-amber-200">
                   You currently have {totalMembers}/{maxTotalMembers} total players (including leader). Minimum required is{" "}
-                  {MIN_TOTAL_MEMBERS}.
+                  {minTotalMembers}.
                 </p>
               ) : (
                 <p className="text-xs text-mn-lime">
-                  Roster valid so far: {totalMembers}/{maxTotalMembers} total players (minimum {MIN_TOTAL_MEMBERS}).
+                  Roster valid so far: {totalMembers}/{maxTotalMembers} total players (minimum {minTotalMembers}).
                 </p>
               )}
             </div>
@@ -598,7 +599,7 @@ export default function ClanCreatePage() {
               </div>
               {!meetsMinimumRoster ? (
                 <p className="text-xs text-amber-200">
-                  Clan creation requires at least {MIN_TOTAL_MEMBERS} total players (leader + members).
+                  Clan creation requires at least {minTotalMembers} total players (leader + members).
                 </p>
               ) : null}
               {!withinMaximumRoster ? (

@@ -103,6 +103,7 @@ export const clashEvents = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     slug: varchar("slug", { length: 64 }).notNull(),
     name: varchar("name", { length: 96 }).notNull(),
+    minMembersPerClan: int("min_members_per_clan").notNull().default(8),
     maxMembersPerClan: int("max_members_per_clan").notNull().default(10),
     lockAt: timestamp("lock_at"),
     isActive: tinyint("is_active").notNull().default(1),

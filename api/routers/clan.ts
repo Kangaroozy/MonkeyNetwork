@@ -19,7 +19,8 @@ import { getClashDb } from "../queries/clashConnection";
 import { hashPassword } from "../lib/session";
 
 const MINECRAFT_NAME_REGEX = /^[A-Za-z0-9_]{3,16}$/;
-const MIN_MEMBERS_PER_CLAN = 8;
+const EVENT_MIN_MEMBERS_FLOOR = 2;
+const EVENT_MAX_MEMBERS_CEILING = 100;
 const DISCORD_INVITE_REGEX = /^https?:\/\/(www\.)?(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]{2,}$/i;
 function normalizeUsername(value: string): string {
   return value.trim().toLowerCase();
@@ -243,6 +244,7 @@ export const clanRouter = createRouter({
       event: {
         id: event.id,
         name: event.name,
+        minMembersPerClan: event.minMembersPerClan,
         maxMembersPerClan: event.maxMembersPerClan,
       },
       clans: items,
@@ -262,6 +264,7 @@ export const clanRouter = createRouter({
       id: event.id,
       slug: event.slug,
       name: event.name,
+      minMembersPerClan: event.minMembersPerClan,
       maxMembersPerClan: event.maxMembersPerClan,
       lockAt: event.lockAt,
       isLocked: isLocked(event.lockAt),
@@ -275,6 +278,7 @@ export const clanRouter = createRouter({
       id: event.id,
       slug: event.slug,
       name: event.name,
+      minMembersPerClan: event.minMembersPerClan,
       maxMembersPerClan: event.maxMembersPerClan,
       lockAt: event.lockAt,
       isLocked: isLocked(event.lockAt),
@@ -385,10 +389,10 @@ export const clanRouter = createRouter({
         .$returningId();
       const clanId = Number(createdClan.id);
       const uniqueMembers = uniqueMinecraftNames([input.kingUsername, ...input.memberUsernames]);
-      if (uniqueMembers.length < MIN_MEMBERS_PER_CLAN) {
+      if (uniqueMembers.length < event.minMembersPerClan) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Clan must have at least ${MIN_MEMBERS_PER_CLAN} total members.`,
+          message: `Clan must have at least ${event.minMembersPerClan} total members.`,
         });
       }
       if (uniqueMembers.length > event.maxMembersPerClan) {
@@ -652,6 +656,50 @@ export const clanRouter = createRouter({
       };
     }),
 
+  adminSetMemberLimits: adminProcedure
+    .input(
+      z
+        .object({
+          minMembersPerClan: z.number().int().min(EVENT_MIN_MEMBERS_FLOOR).max(EVENT_MAX_MEMBERS_CEILING),
+          maxMembersPerClan: z.number().int().min(EVENT_MIN_MEMBERS_FLOOR).max(EVENT_MAX_MEMBERS_CEILING),
+        })
+        .superRefine((value, refinementCtx) => {
+          if (value.minMembersPerClan > value.maxMembersPerClan) {
+            refinementCtx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Minimum members cannot be greater than maximum members.",
+              path: ["minMembersPerClan"],
+            });
+          }
+        }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getClashDb();
+      const event = await getActiveEvent();
+      await db
+        .update(clashEvents)
+        .set({
+          minMembersPerClan: input.minMembersPerClan,
+          maxMembersPerClan: input.maxMembersPerClan,
+        })
+        .where(eq(clashEvents.id, event.id));
+      await writeAudit({
+        eventId: event.id,
+        actorAccountId: String(ctx.session.accountId),
+        actorDisplayName: ctx.session.minecraftUsername,
+        action: "LOCK_UPDATED",
+        payload: {
+          minMembersPerClan: input.minMembersPerClan,
+          maxMembersPerClan: input.maxMembersPerClan,
+        },
+      });
+      return {
+        ok: true,
+        minMembersPerClan: input.minMembersPerClan,
+        maxMembersPerClan: input.maxMembersPerClan,
+      };
+    }),
+
   adminCreateClan: adminProcedure.input(createClanSchema).mutation(async ({ ctx, input }) => {
     const db = getClashDb();
     const event = await getActiveEvent();
@@ -670,6 +718,12 @@ export const clanRouter = createRouter({
       .$returningId();
     const clanId = Number(createdClan.id);
     const uniqueMembers = uniqueMinecraftNames([input.kingUsername, ...input.memberUsernames]);
+    if (uniqueMembers.length < event.minMembersPerClan) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Clan must have at least ${event.minMembersPerClan} total members.`,
+      });
+    }
     if (uniqueMembers.length > event.maxMembersPerClan) {
       throw new TRPCError({
         code: "BAD_REQUEST",

@@ -120,6 +120,7 @@ async function buildPluginSyncPayload() {
       version: "1.0",
       event: null,
       lockAt: null,
+      minMembersPerClan: 0,
       maxMembersPerClan: 0,
       clans: [] as Array<{
         name: string;
@@ -184,6 +185,7 @@ async function buildPluginSyncPayload() {
       name: activeEvent.name,
     },
     lockAt: activeEvent.lockAt?.toISOString() ?? null,
+    minMembersPerClan: activeEvent.minMembersPerClan,
     maxMembersPerClan: activeEvent.maxMembersPerClan,
     clans: Array.from(clanMap.values()),
   };
