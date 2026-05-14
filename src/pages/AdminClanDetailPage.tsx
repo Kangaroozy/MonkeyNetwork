@@ -4,6 +4,9 @@ import { trpc } from "@/providers/trpc";
 import ClanRosterTable from "@/components/clan/ClanRosterTable";
 import ClanSettingsForm from "@/components/clan/ClanSettingsForm";
 
+const CLAN_NAME_REGEX = /^[A-Za-z0-9 ]+$/;
+const CLAN_NAME_MAX_LENGTH = 14;
+
 type ClashTrim =
   | "SENTRY"
   | "VEX"
@@ -71,6 +74,7 @@ export default function AdminClanDetailPage() {
   const [trim, setTrim] = useState<ClashTrim>("SENTRY");
   const [material, setMaterial] = useState<ClashMaterial>("IRON");
   const [color, setColor] = useState<ClashColor>("WHITE");
+  const [clanName, setClanName] = useState("");
   const [discordServerLink, setDiscordServerLink] = useState("");
   const [declineReason, setDeclineReason] = useState("");
   const [uiNotice, setUiNotice] = useState("");
@@ -128,6 +132,7 @@ export default function AdminClanDetailPage() {
     setTrim(clan.trim as ClashTrim);
     setMaterial(clan.material as ClashMaterial);
     setColor(clan.color as ClashColor);
+    setClanName(clan.name);
     setDiscordServerLink(clan.discordServerLink ?? "");
     setDeclineReason(clan.reviewDeclineReason ?? "");
   }, [clan]);
@@ -197,6 +202,16 @@ export default function AdminClanDetailPage() {
   const trims = optionsQuery.data?.trims ?? [];
   const materials = optionsQuery.data?.materials ?? [];
   const colors = optionsQuery.data?.colors ?? [];
+  const cleanClanName = clanName.trim();
+  const clanNameValidationError = useMemo(() => {
+    if (!cleanClanName) return "Clan name is required.";
+    if (cleanClanName.length < 2) return "Clan name must be at least 2 characters.";
+    if (cleanClanName.length > CLAN_NAME_MAX_LENGTH) return "Clan name must be less than 15 characters.";
+    if (!CLAN_NAME_REGEX.test(cleanClanName)) {
+      return "Clan name can only contain letters, numbers, and spaces.";
+    }
+    return "";
+  }, [cleanClanName]);
   const canConfirmDelete = deleteConfirmInput.trim().toUpperCase() === "DELETE CLAN";
 
   return (
@@ -269,6 +284,21 @@ export default function AdminClanDetailPage() {
       <div className="mb-6 rounded-xl border border-white/10 bg-mn-moss/70 p-6">
         <h2 className="text-lg font-semibold text-mn-mist">Edit Clan Settings</h2>
         <div className="mt-3">
+          <div className="mb-4 grid gap-1">
+            <label className="text-xs text-mn-fog">Clan Name</label>
+            <input
+              value={clanName}
+              onChange={(event) => setClanName(event.target.value)}
+              className="rounded-md border border-white/15 bg-mn-leaf px-3 py-2 text-sm text-mn-mist"
+              placeholder="Clan Name"
+              maxLength={CLAN_NAME_MAX_LENGTH}
+            />
+            {clanNameValidationError ? (
+              <p className="text-xs text-amber-200">{clanNameValidationError}</p>
+            ) : (
+              <p className="text-xs text-mn-fog">Use only letters, numbers, and spaces. Max 14 characters.</p>
+            )}
+          </div>
           <ClanSettingsForm
             trims={trims}
             materials={materials}
@@ -282,6 +312,7 @@ export default function AdminClanDetailPage() {
             onSubmit={() =>
               updateClanSettingsMutation.mutate({
                 clanId: clan.id,
+                name: cleanClanName,
                 trim,
                 material,
                 color,
@@ -289,7 +320,7 @@ export default function AdminClanDetailPage() {
               })
             }
             submitLabel="Save Settings"
-            disabled={updateClanSettingsMutation.isPending}
+            disabled={updateClanSettingsMutation.isPending || !!clanNameValidationError}
           />
           <div className="mt-3 grid gap-1">
             <label className="text-xs text-mn-fog">Discord Server Invite</label>

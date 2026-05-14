@@ -19,6 +19,8 @@ import { ensureClashSchemaCompatibility, getClashDb } from "../queries/clashConn
 import { hashPassword } from "../lib/session";
 
 const MINECRAFT_NAME_REGEX = /^[A-Za-z0-9_]{3,16}$/;
+const CLAN_NAME_REGEX = /^[A-Za-z0-9 ]+$/;
+const CLAN_NAME_MAX_LENGTH = 14;
 const EVENT_MIN_MEMBERS_FLOOR = 2;
 const EVENT_MAX_MEMBERS_CEILING = 100;
 const FALLBACK_MIN_MEMBERS_PER_CLAN = 8;
@@ -38,7 +40,12 @@ function isMissingMinMembersColumnError(error: unknown): boolean {
 }
 
 const createClanSchema = z.object({
-  name: z.string().trim().min(2).max(64),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Clan name must be at least 2 characters.")
+    .max(CLAN_NAME_MAX_LENGTH, `Clan name must be less than 15 characters.`)
+    .regex(CLAN_NAME_REGEX, "Clan name can only contain letters, numbers, and spaces."),
   kingUsername: z.string().trim().regex(MINECRAFT_NAME_REGEX, "Invalid leader Minecraft username."),
   memberUsernames: z.array(z.string().trim().regex(MINECRAFT_NAME_REGEX)).max(19),
   discordServerLink: z.string().trim().regex(DISCORD_INVITE_REGEX, "Enter a valid Discord invite link."),
@@ -487,6 +494,12 @@ export const clanRouter = createRouter({
   updateMyClanSettings: protectedProcedure
     .input(
       z.object({
+        name: z
+          .string()
+          .trim()
+          .min(2, "Clan name must be at least 2 characters.")
+          .max(CLAN_NAME_MAX_LENGTH, `Clan name must be less than 15 characters.`)
+          .regex(CLAN_NAME_REGEX, "Clan name can only contain letters, numbers, and spaces."),
         trim: z.enum(CLASH_TRIM_OPTIONS),
         material: z.enum(CLASH_MATERIAL_OPTIONS),
         color: z.enum(CLASH_COLOR_OPTIONS),
@@ -498,9 +511,24 @@ export const clanRouter = createRouter({
       const event = await getActiveEvent();
       assertMutable(event.lockAt, ctx.isAdmin);
       const clan = await requireLeaderClan(event.id, ctx.session.accountId);
+      const [existingClanName] = await db
+        .select({ id: clashClans.id })
+        .from(clashClans)
+        .where(
+          and(
+            eq(clashClans.eventId, event.id),
+            eq(clashClans.name, input.name),
+            sql`${clashClans.id} <> ${clan.id}`,
+          ),
+        )
+        .limit(1);
+      if (existingClanName) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "A clan with that name already exists." });
+      }
       await db
         .update(clashClans)
         .set({
+          name: input.name,
           trim: input.trim,
           material: input.material,
           color: input.color,
@@ -554,6 +582,8 @@ export const clanRouter = createRouter({
       eventId: event.id,
       clanId: clan.id,
       minecraftName: input.minecraftName,
+      discordUserId: null,
+      discordUsername: null,
       isLeader: 0,
       source: "PLAYER",
     });
@@ -834,6 +864,12 @@ export const clanRouter = createRouter({
     .input(
       z.object({
         clanId: z.number().int().positive(),
+        name: z
+          .string()
+          .trim()
+          .min(2, "Clan name must be at least 2 characters.")
+          .max(CLAN_NAME_MAX_LENGTH, `Clan name must be less than 15 characters.`)
+          .regex(CLAN_NAME_REGEX, "Clan name can only contain letters, numbers, and spaces."),
         trim: z.enum(CLASH_TRIM_OPTIONS),
         material: z.enum(CLASH_MATERIAL_OPTIONS),
         color: z.enum(CLASH_COLOR_OPTIONS),
@@ -844,9 +880,24 @@ export const clanRouter = createRouter({
       const db = getClashDb();
       const event = await getActiveEvent();
       const clan = await requireClanById(input.clanId, event.id);
+      const [existingClanName] = await db
+        .select({ id: clashClans.id })
+        .from(clashClans)
+        .where(
+          and(
+            eq(clashClans.eventId, event.id),
+            eq(clashClans.name, input.name),
+            sql`${clashClans.id} <> ${clan.id}`,
+          ),
+        )
+        .limit(1);
+      if (existingClanName) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "A clan with that name already exists." });
+      }
       await db
         .update(clashClans)
         .set({
+          name: input.name,
           trim: input.trim,
           material: input.material,
           color: input.color,
@@ -941,6 +992,8 @@ export const clanRouter = createRouter({
         eventId: event.id,
         clanId: clan.id,
         minecraftName: input.minecraftName,
+        discordUserId: null,
+        discordUsername: null,
         isLeader: 0,
         source: input.source,
       });

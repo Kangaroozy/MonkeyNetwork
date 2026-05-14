@@ -51,6 +51,8 @@ type ClashColor =
   | "WHITE";
 
 const MINECRAFT_NAME_REGEX = /^[A-Za-z0-9_]{3,16}$/;
+const CLAN_NAME_REGEX = /^[A-Za-z0-9 ]+$/;
+const CLAN_NAME_MAX_LENGTH = 14;
 const DISCORD_INVITE_REGEX = /^https?:\/\/(www\.)?(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]{2,}$/i;
 const STEP_TITLES = ["Clan Basics", "Style", "Discord", "Members", "Review"] as const;
 const MINECRAFT_COLOR_HEX: Record<ClashColor, string> = {
@@ -112,7 +114,9 @@ export default function ClanCreatePage() {
 
   const cleanClanName = clanName.trim();
   const cleanKing = kingUsername.trim();
-  const canContinueBasics = cleanClanName.length >= 2 && MINECRAFT_NAME_REGEX.test(cleanKing);
+  const isClanNameValid =
+    cleanClanName.length >= 2 && cleanClanName.length <= CLAN_NAME_MAX_LENGTH && CLAN_NAME_REGEX.test(cleanClanName);
+  const canContinueBasics = isClanNameValid && MINECRAFT_NAME_REGEX.test(cleanKing);
   const canContinueStyle = !optionsQuery.isLoading && !optionsQuery.error;
   const canContinueDiscord = DISCORD_INVITE_REGEX.test(discordServerLink.trim());
   const maxTotalMembers = myClanQuery.data?.event.maxMembersPerClan ?? 10;
@@ -389,6 +393,7 @@ export default function ClanCreatePage() {
                 onChange={(event) => setClanName(event.target.value)}
                 className="rounded-md border border-white/15 bg-mn-leaf px-3 py-2 text-sm text-mn-mist"
                 placeholder="Clan Name"
+                maxLength={CLAN_NAME_MAX_LENGTH}
               />
               <input
                 value={kingUsername}
@@ -397,7 +402,9 @@ export default function ClanCreatePage() {
                 placeholder="Leader Username"
               />
               {!canContinueBasics ? (
-                <p className="text-xs text-mn-fog/80">Enter a clan name and a valid leader username to continue.</p>
+                <p className="text-xs text-mn-fog/80">
+                  Clan names must be 2-14 characters, letters/numbers/spaces only, and leader username must be valid.
+                </p>
               ) : null}
             </div>
           ) : null}

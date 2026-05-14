@@ -4,6 +4,9 @@ import { trpc } from "@/providers/trpc";
 import ClanRosterTable from "@/components/clan/ClanRosterTable";
 import ClanSettingsForm from "@/components/clan/ClanSettingsForm";
 
+const CLAN_NAME_REGEX = /^[A-Za-z0-9 ]+$/;
+const CLAN_NAME_MAX_LENGTH = 14;
+
 type ClashTrim =
   | "SENTRY"
   | "VEX"
@@ -52,20 +55,6 @@ type ClashColor =
   | "YELLOW"
   | "WHITE";
 
-function MemberHead({ username }: { username: string }) {
-  return (
-    <div className="rounded-lg border border-white/10 bg-mn-void/60 p-2 text-center">
-      <img
-        src={`https://mc-heads.net/avatar/${encodeURIComponent(username)}/40`}
-        alt={username}
-        className="mx-auto h-10 w-10 rounded object-cover"
-        loading="lazy"
-      />
-      <p className="mt-1 truncate text-[10px] text-mn-fog">{username}</p>
-    </div>
-  );
-}
-
 function useAuthState() {
   return trpc.clan.me.useQuery(undefined, {
     retry: false,
@@ -75,7 +64,6 @@ function useAuthState() {
 export default function ClanManagement() {
   const authQuery = useAuthState();
   const optionsQuery = trpc.clan.options.useQuery();
-  const directoryQuery = trpc.clan.publicDirectory.useQuery(undefined, { retry: false });
   const myClanQuery = trpc.clan.myClan.useQuery(undefined, {
     enabled: authQuery.isSuccess,
   });
@@ -96,6 +84,7 @@ export default function ClanManagement() {
   const [trim, setTrim] = useState<ClashTrim>("SENTRY");
   const [material, setMaterial] = useState<ClashMaterial>("IRON");
   const [color, setColor] = useState<ClashColor>("WHITE");
+  const [clanName, setClanName] = useState("");
   const [discordServerLink, setDiscordServerLink] = useState("");
   const createButtonLabel = authQuery.isSuccess ? "Create a Clan Here" : "Create a Clan Here (Login Required)";
 
@@ -132,6 +121,7 @@ export default function ClanManagement() {
     setTrim(clan.trim as ClashTrim);
     setMaterial(clan.material as ClashMaterial);
     setColor((clan.color as ClashColor) ?? "WHITE");
+    setClanName(clan.name);
     setDiscordServerLink(clan.discordServerLink ?? "");
   }, [myClanQuery.data?.clan]);
 
@@ -203,6 +193,17 @@ export default function ClanManagement() {
     updateSettingsMutation.error?.message,
   ]);
 
+  const cleanClanName = clanName.trim();
+  const clanNameValidationError = useMemo(() => {
+    if (!cleanClanName) return "Clan name is required.";
+    if (cleanClanName.length < 2) return "Clan name must be at least 2 characters.";
+    if (cleanClanName.length > CLAN_NAME_MAX_LENGTH) return "Clan name must be less than 15 characters.";
+    if (!CLAN_NAME_REGEX.test(cleanClanName)) {
+      return "Clan name can only contain letters, numbers, and spaces.";
+    }
+    return "";
+  }, [cleanClanName]);
+
   if (authQuery.isLoading) {
     return <div className="mx-auto max-w-5xl px-4 py-24 text-mn-fog">Checking account session...</div>;
   }
@@ -213,7 +214,7 @@ export default function ClanManagement() {
         <div className="mb-6 rounded-xl border border-mn-lime/40 bg-[linear-gradient(120deg,rgba(196,255,77,0.15),rgba(102,255,220,0.12))] p-6">
           <h1 className="text-2xl font-bold text-mn-mist">Clan War Event</h1>
           <p className="mt-2 text-sm text-mn-fog">
-            View all clans below. Ready to register yours? Start the clan setup flow.
+            Ready to register your team? Start the clan setup flow.
           </p>
           <button
             type="button"
@@ -324,51 +325,6 @@ export default function ClanManagement() {
           ) : null}
         </div>
 
-        <div className="mt-6 rounded-xl border border-white/10 bg-mn-moss/70 p-6">
-          <h2 className="text-lg font-semibold text-mn-mist">Current Clans</h2>
-          {directoryQuery.isLoading ? (
-            <p className="mt-3 text-sm text-mn-fog">Loading clans...</p>
-          ) : directoryQuery.error ? (
-            <p className="mt-3 text-sm text-red-200">{directoryQuery.error.message}</p>
-          ) : (
-            <div className="mt-4 space-y-4">
-              {directoryQuery.data?.clans.map((clan) => (
-                <div key={clan.id} className="rounded-lg border border-white/10 bg-mn-void/40 p-4">
-                  <p className="text-sm font-semibold text-mn-mist">{clan.name}</p>
-                  <p className="mt-1 text-xs text-mn-fog">
-                    {clan.memberCount}/{directoryQuery.data?.event.maxMembersPerClan ?? 10} members
-                  </p>
-                  <div className="mt-3 grid gap-3 md:grid-cols-[170px_1fr]">
-                    <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                      <p className="mb-1 text-[11px] text-mn-fog">Leader</p>
-                      {clan.king ? (
-                        <>
-                          <img
-                            src={`https://mc-heads.net/body/${encodeURIComponent(clan.king)}/right`}
-                            alt={clan.king}
-                            className="mx-auto h-32 w-auto object-contain"
-                            loading="lazy"
-                          />
-                          <p className="mt-1 text-center text-xs text-mn-mist">{clan.king}</p>
-                        </>
-                      ) : (
-                        <p className="text-xs text-mn-fog">No leader set</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="mb-1 text-[11px] text-mn-fog">Members</p>
-                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-                        {clan.members.map((member) => (
-                          <MemberHead key={`${clan.id}-${member}`} username={member} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     );
   }
@@ -389,7 +345,7 @@ export default function ClanManagement() {
         <div className="mb-6 rounded-xl border border-mn-lime/40 bg-[linear-gradient(120deg,rgba(196,255,77,0.15),rgba(102,255,220,0.12))] p-6">
           <h1 className="text-2xl font-bold text-mn-mist">Clan War Event</h1>
           <p className="mt-2 text-sm text-mn-fog">
-            View all clans below. Ready to register yours? Start the clan setup flow.
+            Ready to register your team? Start the clan setup flow.
           </p>
           <Link
             to="/clans/create"
@@ -408,16 +364,6 @@ export default function ClanManagement() {
           </p>
         </div>
 
-        <div className="mt-6 rounded-xl border border-white/10 bg-mn-moss/70 p-6">
-          <h2 className="text-lg font-semibold text-mn-mist">Current Clans</h2>
-          {directoryQuery.isLoading ? (
-            <p className="mt-3 text-sm text-mn-fog">Loading clans...</p>
-          ) : directoryQuery.error ? (
-            <p className="mt-3 text-sm text-red-200">{directoryQuery.error.message}</p>
-          ) : (
-            <div className="mt-3 text-sm text-mn-fog">No clans available.</div>
-          )}
-        </div>
       </div>
     );
   }
@@ -430,7 +376,7 @@ export default function ClanManagement() {
       <div className="mb-6 rounded-xl border border-mn-lime/40 bg-[linear-gradient(120deg,rgba(196,255,77,0.15),rgba(102,255,220,0.12))] p-6">
         <h1 className="text-2xl font-bold text-mn-mist">Clan War Event</h1>
         <p className="mt-2 text-sm text-mn-fog">
-          View all clans below. Ready to register yours? Start the clan setup flow.
+          Manage your clan settings and roster here.
         </p>
         <Link
           to="/clans/create"
@@ -438,52 +384,6 @@ export default function ClanManagement() {
         >
           {createButtonLabel}
         </Link>
-      </div>
-
-      <div className="mb-6 rounded-xl border border-white/10 bg-mn-moss/70 p-6">
-        <h2 className="text-lg font-semibold text-mn-mist">Current Clans</h2>
-        {directoryQuery.isLoading ? (
-          <p className="mt-3 text-sm text-mn-fog">Loading clans...</p>
-        ) : directoryQuery.error ? (
-          <p className="mt-3 text-sm text-red-200">{directoryQuery.error.message}</p>
-        ) : (
-          <div className="mt-4 space-y-4">
-            {directoryQuery.data?.clans.map((clan) => (
-              <div key={clan.id} className="rounded-lg border border-white/10 bg-mn-void/40 p-4">
-                <p className="text-sm font-semibold text-mn-mist">{clan.name}</p>
-                <p className="mt-1 text-xs text-mn-fog">
-                  {clan.memberCount}/{directoryQuery.data?.event.maxMembersPerClan ?? 10} members
-                </p>
-                <div className="mt-3 grid gap-3 md:grid-cols-[170px_1fr]">
-                  <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                    <p className="mb-1 text-[11px] text-mn-fog">Leader</p>
-                    {clan.king ? (
-                      <>
-                        <img
-                          src={`https://mc-heads.net/body/${encodeURIComponent(clan.king)}/right`}
-                          alt={clan.king}
-                          className="mx-auto h-32 w-auto object-contain"
-                          loading="lazy"
-                        />
-                        <p className="mt-1 text-center text-xs text-mn-mist">{clan.king}</p>
-                      </>
-                    ) : (
-                      <p className="text-xs text-mn-fog">No leader set</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="mb-1 text-[11px] text-mn-fog">Members</p>
-                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-                      {clan.members.map((member) => (
-                        <MemberHead key={`${clan.id}-${member}`} username={member} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="mb-6 rounded-xl border border-white/10 bg-mn-moss/70 p-6">
@@ -543,6 +443,22 @@ export default function ClanManagement() {
               Members: {payload.clan.members.length}/{payload.event.maxMembersPerClan}
             </p>
             <div className="mt-4">
+              <div className="mb-4 grid gap-2">
+                <label className="text-xs text-mn-fog">Clan Name</label>
+                <input
+                  value={clanName}
+                  onChange={(event) => setClanName(event.target.value)}
+                  className="rounded-md border border-white/15 bg-mn-leaf px-3 py-2 text-sm text-mn-mist"
+                  placeholder="Clan Name"
+                  maxLength={CLAN_NAME_MAX_LENGTH}
+                  disabled={!canEdit}
+                />
+                {clanNameValidationError ? (
+                  <p className="text-xs text-amber-200">{clanNameValidationError}</p>
+                ) : (
+                  <p className="text-xs text-mn-fog">Use only letters, numbers, and spaces. Max 14 characters.</p>
+                )}
+              </div>
               <ClanSettingsForm
                 trims={trims}
                 materials={materials}
@@ -555,6 +471,7 @@ export default function ClanManagement() {
                 onColorChange={(value) => setColor(value as ClashColor)}
                 onSubmit={() =>
                   updateSettingsMutation.mutate({
+                    name: cleanClanName,
                     trim,
                     material,
                     color,
@@ -562,7 +479,7 @@ export default function ClanManagement() {
                   })
                 }
                 submitLabel="Save Clan Settings"
-                disabled={!canEdit || updateSettingsMutation.isPending}
+                disabled={!canEdit || updateSettingsMutation.isPending || !!clanNameValidationError}
               />
               <div className="mt-3 grid gap-2">
                 <label className="text-xs text-mn-fog">
