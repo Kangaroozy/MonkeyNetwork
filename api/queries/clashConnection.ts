@@ -14,6 +14,13 @@ const clashSchema = {
 let instance: ReturnType<typeof drizzle<typeof clashSchema>>;
 let schemaEnsurePromise: Promise<void> | null = null;
 
+function assertClashDatabaseConfigured() {
+  if (env.clashEnabled) {
+    return;
+  }
+  throw new Error("Clash is disabled because CLASH_DATABASE_URL is not set.");
+}
+
 function isDuplicateColumnError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const code = "code" in error ? error.code : "";
@@ -35,6 +42,7 @@ function isAlterIfNotExistsSyntaxError(error: unknown): boolean {
 }
 
 export function getClashDb() {
+  assertClashDatabaseConfigured();
   if (!instance) {
     instance = drizzle(env.clashDatabaseUrl, {
       mode: "planetscale",
@@ -55,23 +63,25 @@ export async function ensureClashSchemaCompatibility() {
       await db.execute(
         sql`ALTER TABLE clash_events ADD COLUMN IF NOT EXISTS min_members_per_clan INT NOT NULL DEFAULT 8`,
       );
-      return;
     } catch (error) {
       if (isAlterIfNotExistsSyntaxError(error)) {
         try {
           await db.execute(sql`ALTER TABLE clash_events ADD COLUMN min_members_per_clan INT NOT NULL DEFAULT 8`);
-          return;
         } catch (fallbackError) {
           if (!isDuplicateColumnError(fallbackError)) {
             throw fallbackError;
           }
-          return;
         }
       }
       if (!isDuplicateColumnError(error)) {
         throw error;
       }
     }
+    await db.execute(sql`
+      ALTER TABLE clash_clan_members
+      MODIFY COLUMN discord_user_id VARCHAR(32) NULL,
+      MODIFY COLUMN discord_username VARCHAR(64) NULL
+    `);
   })();
   try {
     await schemaEnsurePromise;

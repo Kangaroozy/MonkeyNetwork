@@ -239,6 +239,16 @@ function uniqueMinecraftNames(names: string[]): string[] {
   return result;
 }
 
+function getLegacyUnlinkedDiscordUserId(minecraftName: string): string {
+  return `legacy-unlinked:${minecraftName.toLowerCase()}`.slice(0, 32);
+}
+
+function getLinkedDiscordUserId(discordUserId: string | null | undefined): string | null {
+  if (!discordUserId) return null;
+  if (discordUserId.startsWith("legacy-unlinked:")) return null;
+  return discordUserId;
+}
+
 async function assertPlayersNotInClan(eventId: number, names: string[]) {
   const db = getClashDb();
   for (const minecraftName of names) {
@@ -465,19 +475,18 @@ export const clanRouter = createRouter({
       }
       await assertPlayersNotInClan(event.id, uniqueMembers);
       await db.insert(clashClanMembers).values(
-        uniqueMembers.map((minecraftName) => ({
-          eventId: event.id,
-          clanId,
-          minecraftName,
-          discordUserId:
-            minecraftName.toLowerCase() === input.kingUsername.toLowerCase()
-              ? String(ctx.session.accountId)
-              : null,
-          discordUsername:
-            minecraftName.toLowerCase() === input.kingUsername.toLowerCase() ? ctx.session.minecraftUsername : null,
-          isLeader: minecraftName.toLowerCase() === input.kingUsername.toLowerCase() ? 1 : 0,
-          source: "PLAYER" as const,
-        })),
+        uniqueMembers.map((minecraftName) => {
+          const isLeader = minecraftName.toLowerCase() === input.kingUsername.toLowerCase();
+          return {
+            eventId: event.id,
+            clanId,
+            minecraftName,
+            discordUserId: isLeader ? String(ctx.session.accountId) : getLegacyUnlinkedDiscordUserId(minecraftName),
+            discordUsername: isLeader ? ctx.session.minecraftUsername : minecraftName,
+            isLeader: isLeader ? 1 : 0,
+            source: "PLAYER" as const,
+          };
+        }),
       );
       await enforceClanSize(clanId, event.maxMembersPerClan);
       await writeAudit({
@@ -582,8 +591,8 @@ export const clanRouter = createRouter({
       eventId: event.id,
       clanId: clan.id,
       minecraftName: input.minecraftName,
-      discordUserId: null,
-      discordUsername: null,
+      discordUserId: getLegacyUnlinkedDiscordUserId(input.minecraftName),
+      discordUsername: input.minecraftName,
       isLeader: 0,
       source: "PLAYER",
     });
@@ -660,7 +669,7 @@ export const clanRouter = createRouter({
         .where(eq(clashClanMembers.id, newLeader.id));
       await db
         .update(clashClans)
-        .set({ leaderDiscordUserId: newLeader.discordUserId ?? String(ctx.session.accountId) })
+        .set({ leaderDiscordUserId: getLinkedDiscordUserId(newLeader.discordUserId) ?? String(ctx.session.accountId) })
         .where(eq(clashClans.id, clan.id));
       const reviewReset = await markClanPendingAfterPlayerEdit(clan.id);
       await writeAudit({
@@ -836,17 +845,18 @@ export const clanRouter = createRouter({
     }
     await assertPlayersNotInClan(event.id, uniqueMembers);
     await db.insert(clashClanMembers).values(
-      uniqueMembers.map((minecraftName) => ({
-        eventId: event.id,
-        clanId,
-        minecraftName,
-        discordUserId:
-          minecraftName.toLowerCase() === input.kingUsername.toLowerCase() ? String(ctx.session.accountId) : null,
-        discordUsername:
-          minecraftName.toLowerCase() === input.kingUsername.toLowerCase() ? ctx.session.minecraftUsername : null,
-        isLeader: minecraftName.toLowerCase() === input.kingUsername.toLowerCase() ? 1 : 0,
-        source: "ADMIN" as const,
-      })),
+      uniqueMembers.map((minecraftName) => {
+        const isLeader = minecraftName.toLowerCase() === input.kingUsername.toLowerCase();
+        return {
+          eventId: event.id,
+          clanId,
+          minecraftName,
+          discordUserId: isLeader ? String(ctx.session.accountId) : getLegacyUnlinkedDiscordUserId(minecraftName),
+          discordUsername: isLeader ? ctx.session.minecraftUsername : minecraftName,
+          isLeader: isLeader ? 1 : 0,
+          source: "ADMIN" as const,
+        };
+      }),
     );
     await enforceClanSize(clanId, event.maxMembersPerClan);
     await writeAudit({
@@ -992,8 +1002,8 @@ export const clanRouter = createRouter({
         eventId: event.id,
         clanId: clan.id,
         minecraftName: input.minecraftName,
-        discordUserId: null,
-        discordUsername: null,
+        discordUserId: getLegacyUnlinkedDiscordUserId(input.minecraftName),
+        discordUsername: input.minecraftName,
         isLeader: 0,
         source: input.source,
       });
@@ -1092,7 +1102,7 @@ export const clanRouter = createRouter({
       await db.update(clashClanMembers).set({ isLeader: 1 }).where(eq(clashClanMembers.id, newLeader.id));
       await db
         .update(clashClans)
-        .set({ leaderDiscordUserId: newLeader.discordUserId ?? clan.leaderDiscordUserId })
+        .set({ leaderDiscordUserId: getLinkedDiscordUserId(newLeader.discordUserId) ?? clan.leaderDiscordUserId })
         .where(eq(clashClans.id, clan.id));
       await writeAudit({
         eventId: event.id,
