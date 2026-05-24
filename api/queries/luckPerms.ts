@@ -41,16 +41,23 @@ export async function resolveLuckPermsPrimaryGroups(
   }
 
   const placeholders = normalized.map(() => "?").join(", ");
-  const [rows] = await db.query<mysql.RowDataPacket[]>(
-    `
-      SELECT
-        LOWER(REPLACE(uuid, '-', '')) AS uuidHex,
-        LOWER(TRIM(primary_group)) AS primaryGroup
-      FROM luckperms_players
-      WHERE REPLACE(uuid, '-', '') IN (${placeholders})
-    `,
-    normalized,
-  );
+  let rows: mysql.RowDataPacket[] = [];
+  try {
+    const [result] = await db.query<mysql.RowDataPacket[]>(
+      `
+        SELECT
+          LOWER(REPLACE(uuid, '-', '')) AS uuidHex,
+          LOWER(TRIM(primary_group)) AS primaryGroup
+        FROM luckperms_players
+        WHERE REPLACE(uuid, '-', '') IN (${placeholders})
+      `,
+      normalized,
+    );
+    rows = result;
+  } catch {
+    // LuckPerms is optional; ignore lookup failures and fall back to profile rank.
+    return new Map();
+  }
 
   const output = new Map<string, string>();
   for (const row of rows) {

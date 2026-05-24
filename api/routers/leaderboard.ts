@@ -34,6 +34,12 @@ function toHeadAvatarUrl(skinUrl: string | null | undefined, playerUuidHex: stri
   return `https://mc-heads.net/avatar/${encodeURIComponent(username)}/64`;
 }
 
+function isSchemaMismatchError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = "code" in error ? error.code : "";
+  return code === "ER_NO_SUCH_TABLE" || code === "ER_BAD_FIELD_ERROR";
+}
+
 export const leaderboardRouter = createRouter({
   filters: publicQuery
     .input(
@@ -43,26 +49,40 @@ export const leaderboardRouter = createRouter({
     )
     .query(async ({ input }) => {
       const db = getDb();
-      const modesQueryRaw = await db.execute(
-        sql`
-          SELECT DISTINCT gamemode_key AS gamemodeKey
-          FROM player_stats_mode_all
-          WHERE gamemode_key IS NOT NULL AND gamemode_key <> ''
-          ORDER BY gamemode_key ASC
-        `,
-      );
+      let modesQueryRaw: unknown = [];
+      try {
+        modesQueryRaw = await db.execute(
+          sql`
+            SELECT DISTINCT gamemode_key AS gamemodeKey
+            FROM player_stats_mode_all
+            WHERE gamemode_key IS NOT NULL AND gamemode_key <> ''
+            ORDER BY gamemode_key ASC
+          `,
+        );
+      } catch (error) {
+        if (!isSchemaMismatchError(error)) {
+          throw error;
+        }
+      }
       const kitsWhere =
         input.mode === "overall"
           ? sql`WHERE kit_key IS NOT NULL AND kit_key <> ''`
           : sql`WHERE gamemode_key = ${input.mode} AND kit_key IS NOT NULL AND kit_key <> ''`;
-      const kitsQueryRaw = await db.execute(
-        sql`
-          SELECT DISTINCT kit_key AS kitKey
-          FROM player_stats_mode_kit
-          ${kitsWhere}
-          ORDER BY kit_key ASC
-        `,
-      );
+      let kitsQueryRaw: unknown = [];
+      try {
+        kitsQueryRaw = await db.execute(
+          sql`
+            SELECT DISTINCT kit_key AS kitKey
+            FROM player_stats_mode_kit
+            ${kitsWhere}
+            ORDER BY kit_key ASC
+          `,
+        );
+      } catch (error) {
+        if (!isSchemaMismatchError(error)) {
+          throw error;
+        }
+      }
       const modeRows = extractRows<{ gamemodeKey: string }>(modesQueryRaw);
       const kitRows = extractRows<{ kitKey: string }>(kitsQueryRaw);
       return {
@@ -157,47 +177,61 @@ export const leaderboardRouter = createRouter({
               GROUP BY stats.player_uuid
             `;
 
-      const leaderboardRowsRaw = await db.execute(
-        sql`
-          WITH aggregated AS (${statsSource})
-          SELECT
-            LOWER(HEX(aggregated.player_uuid)) AS playerUuidHex,
-            COALESCE(web_profile.player_name, LEFT(LOWER(HEX(aggregated.player_uuid)), 12)) AS username,
-            web_profile.skin_url AS avatarUrl,
-            COALESCE(profile.rank, 'default') AS rankKey,
-            COALESCE(profile.level, 1) AS level,
-            aggregated.wins AS wins,
-            aggregated.losses AS losses,
-            aggregated.totalKills AS totalKills,
-            aggregated.deaths AS deaths,
-            aggregated.matchesPlayed AS matchesPlayed,
-            CASE
-              WHEN aggregated.matchesPlayed <= 0 THEN 0
-              ELSE aggregated.wins / aggregated.matchesPlayed
-            END AS winRate,
-            CASE
-              WHEN aggregated.deaths <= 0 THEN aggregated.totalKills
-              ELSE aggregated.totalKills / aggregated.deaths
-            END AS kda,
-            CASE
-              WHEN aggregated.matchesPlayed <= 0 THEN 0
-              ELSE aggregated.totalKills / aggregated.matchesPlayed
-            END AS killAverage
-          FROM aggregated
-          LEFT JOIN player_web_profile web_profile ON web_profile.unique_id = aggregated.player_uuid
-          LEFT JOIN player_profile profile ON profile.unique_id = aggregated.player_uuid
-          ORDER BY ${orderExpr} ${direction}, username ASC
-          LIMIT ${input.limit} OFFSET ${offset}
-        `,
-      );
+      let leaderboardRowsRaw: unknown = [];
+      let countRowsRaw: unknown = [];
+      try {
+        leaderboardRowsRaw = await db.execute(
+          sql`
+            WITH aggregated AS (${statsSource})
+            SELECT
+              LOWER(HEX(aggregated.player_uuid)) AS playerUuidHex,
+              COALESCE(web_profile.player_name, LEFT(LOWER(HEX(aggregated.player_uuid)), 12)) AS username,
+              web_profile.skin_url AS avatarUrl,
+              COALESCE(profile.rank, 'default') AS rankKey,
+              1 AS level,
+              aggregated.wins AS wins,
+              aggregated.losses AS losses,
+              aggregated.totalKills AS totalKills,
+              aggregated.deaths AS deaths,
+              aggregated.matchesPlayed AS matchesPlayed,
+              CASE
+                WHEN aggregated.matchesPlayed <= 0 THEN 0
+                ELSE aggregated.wins / aggregated.matchesPlayed
+              END AS winRate,
+              CASE
+                WHEN aggregated.deaths <= 0 THEN aggregated.totalKills
+                ELSE aggregated.totalKills / aggregated.deaths
+              END AS kda,
+              CASE
+                WHEN aggregated.matchesPlayed <= 0 THEN 0
+                ELSE aggregated.totalKills / aggregated.matchesPlayed
+              END AS killAverage
+            FROM aggregated
+            LEFT JOIN player_web_profile web_profile ON web_profile.unique_id = aggregated.player_uuid
+            LEFT JOIN player_profile profile ON profile.unique_id = aggregated.player_uuid
+            ORDER BY ${orderExpr} ${direction}, username ASC
+            LIMIT ${input.limit} OFFSET ${offset}
+          `,
+        );
 
-      const countRowsRaw = await db.execute(
-        sql`
-          WITH aggregated AS (${statsSource})
-          SELECT COUNT(*) AS total
-          FROM aggregated
-        `,
-      );
+        countRowsRaw = await db.execute(
+          sql`
+            WITH aggregated AS (${statsSource})
+            SELECT COUNT(*) AS total
+            FROM aggregated
+          `,
+        );
+      } catch (error) {
+        if (!isSchemaMismatchError(error)) {
+          throw error;
+        }
+        return {
+          players: [],
+          total: 0,
+          page: input.page,
+          totalPages: 0,
+        };
+      }
       const leaderboardRows = extractRows<{
         playerUuidHex: string;
         username: string;
