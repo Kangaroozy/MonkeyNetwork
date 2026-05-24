@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router";
-import { Crown, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { formatNumber, formatWinRate, modeColor, modeLabel } from "@/lib/tiers";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
@@ -98,13 +98,13 @@ function HeroSection({ onLeaderboardClick }: HeroSectionProps) {
 
       <div ref={introRef} className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
         <p className="hero-intro mn-eyebrow mb-6 text-mn-fog">
-          MonkeyNetwork · live boards
+          Maybee Hive · live boards
         </p>
 
         <h1 className="hero-intro font-display font-extrabold tracking-[-0.055em] leading-[0.9] mb-5 sm:mb-7">
-          <span className="block text-[44px] sm:text-[clamp(3.5rem,12vw,6.75rem)] text-mn-mist">Monkey</span>
+          <span className="block text-[44px] sm:text-[clamp(3.5rem,12vw,6.75rem)] text-mn-mist">Maybee</span>
           <span className="block text-[44px] sm:text-[clamp(3.5rem,12vw,6.75rem)] mn-wordmark-gradient drop-shadow-[0_0_40px_rgba(196,255,77,0.12)]">
-            Network
+            Hive
           </span>
         </h1>
 
@@ -123,15 +123,6 @@ function HeroSection({ onLeaderboardClick }: HeroSectionProps) {
             </span>
             Leaderboard
           </button>
-          <Link
-            to="/clans"
-            className="relative inline-flex items-center gap-2.5 rounded-lg border border-mn-lime/60 bg-[linear-gradient(90deg,rgba(196,255,77,0.26),rgba(102,255,220,0.18))] pl-3 pr-4 py-2 text-[13px] font-bold tracking-[0.04em] text-mn-mist uppercase shadow-[0_0_36px_rgba(196,255,77,0.32)] transition-transform duration-200 hover:scale-[1.03] hover:shadow-[0_0_42px_rgba(196,255,77,0.42)]"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-mn-lime/25 text-mn-lime">
-              <Crown className="w-3.5 h-3.5" />
-            </span>
-            Clan War Event
-          </Link>
         </div>
       </div>
 

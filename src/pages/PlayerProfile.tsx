@@ -207,7 +207,7 @@ function ClassUsagePanel({ player }: { player: PlayerForClassUsage }) {
               <KitUsageStatBox label="Kills" value={formatNumber(kills)} />
             </div>
             <p className="text-[11px] leading-relaxed text-mn-dim">
-              These numbers come from real games you finished on MonkeyNetwork. Every time you play this kit in a match, it adds
+              These numbers come from real games you finished on Maybee Hive. Every time you play this kit in a match, it adds
               to your totals. Wins, losses, kills, and how many matches you used it all update when the game saves at the end.
               The hub and queue can&apos;t change them — only your actual matches can.
             </p>
@@ -424,7 +424,7 @@ export default function PlayerProfile() {
                       icon={Trophy}
                       label="Matches played"
                       value={formatNumber(player.matchesPlayed)}
-                      detail="All-time on MonkeyNetwork"
+                      detail="All-time on Maybee Hive"
                     />
                   </li>
                   <li>

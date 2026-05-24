@@ -1,1 +1,1 @@
-export const MONKEY_NETWORK_SERVER_IP = "monkeynetwork.online";
+export const MAYBEE_HIVE_SERVER_IP = "mc.maybeeshive.fun";

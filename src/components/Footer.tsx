@@ -3,7 +3,7 @@ import BrandMark from "@/components/BrandMark";
 import ServerIpPill from "@/components/ServerIpPill";
 
 export default function Footer() {
-  const discordUrl = "https://discord.gg/tkE6BzXA3Q";
+  const discordUrl = "https://discord.gg/vrqJn9CbUF";
   return (
     <footer className="relative border-t border-white/[0.07] bg-mn-canopy/80 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 mn-grid-overlay mn-grid-overlay--footer opacity-50" aria-hidden />
@@ -15,7 +15,7 @@ export default function Footer() {
             </span>
             <div>
               <span className="font-display text-[15px] font-bold tracking-[-0.04em] text-mn-mist block">
-                Monkey<span className="text-mn-lime">Network</span>
+                Maybee <span className="text-mn-lime">Hive</span>
               </span>
               <span className="mn-eyebrow mt-1 block opacity-80">UHC rankings</span>
             </div>
@@ -32,7 +32,7 @@ export default function Footer() {
           </a>
         </div>
         <p className="text-[12px] text-mn-dim max-w-xl leading-relaxed">
-          MonkeyNetwork 2026. Not affiliated with Mojang Studios or Microsoft.
+          Maybee Hive 2026. Not affiliated with Mojang Studios or Microsoft.
         </p>
         <div className="mt-4">
           <ServerIpPill />

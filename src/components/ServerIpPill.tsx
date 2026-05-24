@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
-import { MONKEY_NETWORK_SERVER_IP } from "@/lib/server";
+import { MAYBEE_HIVE_SERVER_IP } from "@/lib/server";
 
 type ServerIpPillProps = {
   className?: string;
@@ -40,7 +40,7 @@ export default function ServerIpPill({
 
   const handleCopy = async () => {
     try {
-      await writeToClipboard(MONKEY_NETWORK_SERVER_IP);
+      await writeToClipboard(MAYBEE_HIVE_SERVER_IP);
       setCopyState("copied");
     } catch {
       setCopyState("error");
@@ -59,7 +59,7 @@ export default function ServerIpPill({
           Server IP
         </span>
       )}
-      <span className={`font-semibold text-mn-mist ${compact ? "text-[12px]" : "text-[13px]"}`}>{MONKEY_NETWORK_SERVER_IP}</span>
+      <span className={`font-semibold text-mn-mist ${compact ? "text-[12px]" : "text-[13px]"}`}>{MAYBEE_HIVE_SERVER_IP}</span>
       <button
         type="button"
         onClick={handleCopy}
