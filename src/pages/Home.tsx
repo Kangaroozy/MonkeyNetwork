@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Crown, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { formatNumber, formatWinRate, modeColor, modeLabel } from "@/lib/tiers";
 import { getLevelColor, getNameColor, getRankIconPath, getStarIconPath } from "@/lib/playerStyle";
